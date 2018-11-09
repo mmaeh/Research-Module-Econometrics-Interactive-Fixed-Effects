@@ -3,7 +3,8 @@ c(i, t) %<-% c(combinations[[iter + 1]][1], combinations[[iter + 1]][2])
 load <- matrix(rnorm(i * r), nrow = i, ncol = r)
 fac <- matrix(rnorm(t * r), nrow = t, ncol = r)
 
-epsilon <- matrix(rnorm(i * t, sd = 2), nrow = t, ncol = i)
+#epsilon <- matrix(rnorm(i * t, sd = 2), nrow = t, ncol = i)
+epsilon <- error_function(t, i, sd = 2)
 
 X <- array(data = NA, dim = c(t, i, length(param)))
 
