@@ -6,10 +6,12 @@ library('zeallot')
 source('beta_update.R')
 source('compute_factor_estimates.R')
 source('compute_xx_inv.R')
+source('error_function.R')
 source('infeasible_estimator.R')
 source('iterative_interactive_estimator.R')
 source('ones_function.R')
-source('parameter_variance.R')
+#source('parameter_variance.R')
+source('parameter_variance_2.R')
 source('within_estimator.R')
 
 #combinations of i and t to use in simulation
@@ -35,10 +37,10 @@ m <- 400
 #container to store results
 temp_results <- data.frame(matrix(nrow = m, ncol = 18))
 results <- data.frame(matrix(nrow = length(combinations), ncol = 18))
-colnames(results) <- c('coef1_ols', 'sd1_ols', 'coef2_ols', 'sd2_ols', 
-                            'coef1_within', 'sd1_within', 'coef2_within', 'sd2_within',
-                            'coef1_infeasible', 'sd1_infeasible', 'coef2_infeasible', 'sd2_infeasible', 'sigma_infeasible',
-                            'coef1_interactive', 'sd1_interactive', 'coef2_interactive', 'sd2_interactive', 'sigma_infeasible')
+colnames(results) <- c('coef1_ols', 'coef2_ols', 'sd1_ols', 'sd2_ols', 
+                      'coef1_within', 'coef2_within', 'sd1_within', 'sd2_within',
+                      'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible', 'sigma_infeasible',
+                      'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive', 'sigma_interactive')
 
 
 #--------------------------------------------
