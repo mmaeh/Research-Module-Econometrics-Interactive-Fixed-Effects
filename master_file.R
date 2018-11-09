@@ -30,25 +30,24 @@ combinations <- list(
 #constants used
 param <- c(1, 3)
 r <- 2
-m <- 500
+m <- 400
 
 #container to store results
-temp_results <- data.frame(matrix(nrow = m, ncol = 16))
-results <- data.frame(matrix(nrow = length(combinations), ncol = 16))
+temp_results <- data.frame(matrix(nrow = m, ncol = 18))
+results <- data.frame(matrix(nrow = length(combinations), ncol = 18))
 colnames(results) <- c('coef1_ols', 'sd1_ols', 'coef2_ols', 'sd2_ols', 
                             'coef1_within', 'sd1_within', 'coef2_within', 'sd2_within',
-                            'coef1_infeasible', 'sd1_infeasible', 'coef2_infeasible', 'sd2_infeasible',
-                            'coef1_interactive', 'sd1_interactive', 'coef2_interactive', 'sd2_interactive')
+                            'coef1_infeasible', 'sd1_infeasible', 'coef2_infeasible', 'sd2_infeasible', 'sigma_infeasible',
+                            'coef1_interactive', 'sd1_interactive', 'coef2_interactive', 'sd2_interactive', 'sigma_infeasible')
 
 
 #--------------------------------------------
 #start simulation process--------------------
 #--------------------------------------------
 
-progress <- txtProgressBar(min = 0, max = length(combinations) * m, style = 3)
-#progress <- txtProgressBar(min = 0, max = length(combinations), style = 3)
+
+progress <- txtProgressBar(min = 0, max = length(combinations), style = 3)
 iter <- 0
-itera <- 0
 
 for (c in combinations) {
   for (j in 1:m) {
@@ -67,20 +66,17 @@ for (c in combinations) {
     
     #estimate infeasible-estimator
     
-    temp_results[j, 9:12] <- infeasible_est(X, Y, given = "factors")
+    temp_results[j, 9:13] <- infeasible_est(X, Y, given = "factors")
     
     #estimate interactive-estimator
   
-    temp_results[j, 13:16] <- interactive_est(X, Y, r, 0.0001)
-    
-    itera <- itera +1
-    setTxtProgressBar(progress, itera)
+    temp_results[j, 14:18] <- interactive_est(X, Y, r, 0.0001)
       
   }
 
 results[iter + 1,] <- colMeans(temp_results, na.rm = TRUE)  
     
 iter <- iter + 1 
-#setTxtProgressBar(progress, iter)
+setTxtProgressBar(progress, iter)
 
 }
