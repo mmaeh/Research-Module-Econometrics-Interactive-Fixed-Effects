@@ -35,12 +35,12 @@ r <- 2
 m <- 400
 
 #container to store results
-temp_results <- data.frame(matrix(nrow = m, ncol = 18))
-results <- data.frame(matrix(nrow = length(combinations), ncol = 18))
+temp_results <- data.frame(matrix(nrow = m, ncol = 22))
+results <- data.frame(matrix(nrow = length(combinations), ncol = 22))
 colnames(results) <- c('coef1_ols', 'coef2_ols', 'sd1_ols', 'sd2_ols', 
                       'coef1_within', 'coef2_within', 'sd1_within', 'sd2_within',
-                      'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible', 'sigma_infeasible',
-                      'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive', 'sigma_interactive')
+                      'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible', 'sigma_infeasible', 'df1_inf', 'df2_inf',
+                      'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive', 'sigma_interactive', 'df1_int', 'df2_int')
 
 
 #--------------------------------------------
@@ -68,11 +68,11 @@ for (c in combinations) {
     
     #estimate infeasible-estimator
     
-    temp_results[j, 9:13] <- infeasible_est(X, Y, given = "factors")
+    #temp_results[j, 9:15] <- infeasible_est(X, Y, given = "factors")
     
     #estimate interactive-estimator
   
-    temp_results[j, 14:18] <- interactive_est(X, Y, r, 0.0001)
+    temp_results[j, 16:22] <- interactive_est(X, Y, r, 0.0001)
       
   }
 

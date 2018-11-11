@@ -29,14 +29,15 @@ interactive_est <-
       c(fac_hat, load_hat, VNT) %<-% factor_est(W, r)
     }
 
-    err <- W - fac_hat %*% t(load_hat)
+    err <- Y - X[,,1] * beta[1] - X[,,2] * beta[2] - fac_hat %*% t(load_hat)
     sigma <- tr(err %*% t(err)) / (i * t - r*(i + t) + r^2 - p)
-    
+        
     D_F <- parameter_variance(X, fac_hat, load_hat)
+    D_F_diag <- diag(D_F)
     
     variance <- sigma * D_F
     sd <- sqrt(diag(variance))
     
-    return(c(beta, sd, sigma))
+    return(c(beta, sd, sigma, D_F_diag))
     
   }

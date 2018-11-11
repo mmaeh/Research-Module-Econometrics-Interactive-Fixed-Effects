@@ -35,14 +35,16 @@ infeasible_est <- function(X, Y, given = NULL) {
   
   err <- Y - X[,,1] * beta[1] - X[,,2] * beta[2] - fac %*% t(load)
   sigma <- tr(err %*% t(err)) / (i * t + r^2 - p)
-  
+    
   W_hat <- Y - X[,,1] * beta[1] - X[,,2] * beta[2]
   load_hat <- t(W_hat) %*% fac / t
+  
   D_F <- parameter_variance(X, fac, load_hat)
+  D_F_diag <- diag(D_F)
   
   variance <- sigma * D_F
   sd <- sqrt(diag(variance))
   
-  return(c(beta, sd, sigma))
+  return(c(beta, sd, sigma, D_F_diag))
   
 }
