@@ -2,7 +2,7 @@ error_function <- function(t, i, mean = 0, sd = 1, cross_corr = FALSE, serial_co
   
   epsilon <- matrix(0, nrow = t, ncol = i)
   
-  if(((cross_corr | serial_corr) & is.na(rho)) == TRUE) {
+  if((cross_corr | serial_corr == TRUE) & (is.na(rho) == TRUE)) {
     stop('You need to specify rho.')
   }
   
@@ -42,8 +42,3 @@ error_function <- function(t, i, mean = 0, sd = 1, cross_corr = FALSE, serial_co
   return(epsilon)
   
 }
-
-
-a <- error_function(10, 100, mean = 1, sd = 2, serial_corr = TRUE)
-sd(a)
-
