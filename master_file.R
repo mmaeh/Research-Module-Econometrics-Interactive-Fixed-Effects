@@ -32,7 +32,7 @@ combinations <- list(
 #constants used
 param <- c(1, 3)
 r <- 2
-m <- 400
+m <- 1000
 
 #container to store results
 temp_results <- data.frame(matrix(nrow = m, ncol = 22))
@@ -60,15 +60,15 @@ for (c in combinations) {
     
     #estimate naive-estimator
     
-    #temp_results[j, 1:4] <- within_est(X, Y, individual = FALSE, time = FALSE)
+    temp_results[j, 1:4] <- within_est(X, Y, individual = FALSE, time = FALSE)
     
     #estimate within-estimator
     
-    #temp_results[j, 5:8] <- within_est(X, Y, individual = TRUE, time = TRUE)
+    temp_results[j, 5:8] <- within_est(X, Y, individual = TRUE, time = TRUE)
     
     #estimate infeasible-estimator
     
-    #temp_results[j, 9:15] <- infeasible_est(X, Y, given = "factors")
+    temp_results[j, 9:15] <- infeasible_est(X, Y, given = "factors")
     
     #estimate interactive-estimator
   
