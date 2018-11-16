@@ -5,7 +5,7 @@ interactive_est <-
     betaold <- matrix(0, nrow = p, ncol = 1)
     
     xxinv <- xx_inv(X)
-    beta <- within_est(X, Y, individual = FALSE, time = FALSE)
+    beta <- within_est(X, Y, individual = TRUE, time = TRUE)
     
     W <- Y
     for (k in 1:length(param)) {
@@ -28,9 +28,13 @@ interactive_est <-
       
       c(fac_hat, load_hat, VNT) %<-% factor_est(W, r)
     }
-
-    err <- Y - X[,,1] * beta[1] - X[,,2] * beta[2] - fac_hat %*% t(load_hat)
-    sigma <- tr(err %*% t(err)) / (i * t - r*(i + t) + r^2 - p)
+    
+    err <- Y - fac_hat %*% t(load_hat)
+    for (j in 1:length(param)) {
+      err <- err - X[,,j] * beta[j]
+    }
+    
+    sigma <- tr(err %*% t(err)) / ((i - r) * (t - r) - p)
         
     D_F <- parameter_variance(X, fac_hat, load_hat)
     D_F_diag <- diag(D_F)

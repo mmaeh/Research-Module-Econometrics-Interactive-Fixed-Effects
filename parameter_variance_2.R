@@ -12,11 +12,11 @@ parameter_variance <- function(X, fac, load) {
   
   for (j in 1:p) {
     for (k in 1:p) {
-      D_F[j, k] <- tr(M_L %*% t(X[,,j]) %*% M_F %*% X[,,k])
+      D_F[j, k] <- 1 / (t * i) * tr(M_L %*% t(X[,,j]) %*% M_F %*% X[,,k])
     }
   }
   
-  D_F <- 1 / (t * i) * solve(1 / (t * i) * D_F) #first term cause of root TN consistency, p. 1241
+  D_F <- 1 / (t * i) * solve(D_F) #first term cause of root TN consistency, p. 1241
   
   return(D_F)
   
