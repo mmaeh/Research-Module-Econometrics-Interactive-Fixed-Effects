@@ -1,5 +1,11 @@
-load <- matrix(rnorm(i * r), nrow = i, ncol = r)
-fac <- matrix(rnorm(t * r), nrow = t, ncol = r)
+load_random <- matrix(rnorm(i), nrow = i, ncol = 1)
+fac_random <- matrix(rnorm(t), nrow = t, ncol = 1)
+
+load_const <- matrix(1, nrow = i, ncol = 1)
+fac_const <- matrix(1, nrow = t, ncol = 1)
+
+load <- cbind(load_random, load_const)
+fac <- cbind(fac_const, fac_random)
 
 X <- array(data = NA, dim = c(t, i, length(param)))
 

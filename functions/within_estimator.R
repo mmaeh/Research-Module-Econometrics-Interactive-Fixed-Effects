@@ -41,6 +41,6 @@ within_est <- function(X,
   var <- sigma * xx_inv(X)
   sd <- sqrt(diag(var))
   
-  return(c(beta, sd))
+  return(beta)
   
 }
