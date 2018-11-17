@@ -6,6 +6,7 @@ error_function <-
            cross_corr = FALSE,
            serial_corr = FALSE,
            rho = NA,
+           burn_in = 0,
            hetero = FALSE) {
     
     epsilon <- matrix(0, nrow = t, ncol = i)
@@ -13,7 +14,10 @@ error_function <-
     if ((cross_corr | serial_corr == TRUE) & (is.na(rho) == TRUE)) {
       stop('You need to specify rho.')
     } else if (cross_corr == TRUE) {
-      for (k in 1:i) {
+      
+      epsilon <- matrix(0, nrow = t, ncol = i + burn_in) 
+      
+      for (k in 1:(i+burn_in)) {
         if (k == 1) {
           epsilon[, k] <- rnorm(t, mean = mean, sd = sd)
         } else {
@@ -21,8 +25,14 @@ error_function <-
             rho * epsilon[, k - 1] + rnorm(t, mean = mean, sd = sd)
         }
       }
+      
+      epsilon <- epsilon[1:t, 1:i]
+      
     } else if (serial_corr == TRUE) {
-      for (k in 1:t) {
+      
+      epsilon <- matrix(0, nrow = (t + burn_in), ncol = i)
+      
+      for (k in 1:(t + burn_in)) {
         if (k == 1) {
           epsilon[k, ] <- rnorm(i, mean = mean, sd = sd)
         } else {
@@ -30,6 +40,9 @@ error_function <-
             rho * epsilon[k - 1, ] + rnorm(i, mean = mean, sd = sd)
         }
       }
+      
+      epsilon <- epsilon[1:t, 1:i]
+      
     } else if (cross_corr == TRUE & serial_corr == TRUE) {
       epsilon[1, ] <- rnorm(i, mean = mean, sd = sd)
       epsilon[, 1] <- rnorm(t, mean = mean, sd = sd)
