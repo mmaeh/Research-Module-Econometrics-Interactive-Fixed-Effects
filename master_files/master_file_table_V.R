@@ -1,6 +1,7 @@
 #load packages
 library('phtt')
 library('psych')
+library('xlsx')
 library('zeallot')
 
 #functions used in the following
@@ -64,7 +65,7 @@ for (c in combinations) {
     #estimate within-estimator
     
     temp_results[j, 7:9] <- within_est(X, Y, individual = TRUE, time = TRUE) #same coeff as plm
-    #temp_results[j, 10:12] <- plm(Y ~ X1 + X2 + X3 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('t', 'i'))$coefficients
+    #temp_results[j, 10:12] <- plm(Y ~ X1 + X2 + X3 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))$coefficients
     
     #estimate infeasible-estimator
     
@@ -84,4 +85,4 @@ for (c in combinations) {
   
 }
 
-write.xlsx(results, file = 'comparison_table.xlsx', sheetName = 'table_5')
+write.xlsx(results, './output/table_V.xlsx'))

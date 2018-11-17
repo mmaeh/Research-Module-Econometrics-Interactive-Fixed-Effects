@@ -1,6 +1,7 @@
 #load packages
 library('phtt')
 library('psych')
+library('xlsx')
 library('zeallot')
 
 #functions used in the following
@@ -81,3 +82,5 @@ for (c in combinations) {
   setTxtProgressBar(progress, iter)
   
 }
+
+write.xlsx(results, './output/table_II.xlsx')

@@ -1,6 +1,8 @@
 #load packages
 library('phtt')
+library('plm')
 library('psych')
+library('xlsx')
 library('zeallot')
 
 #functions used in the following
@@ -28,8 +30,8 @@ temp_results <- data.frame(matrix(nrow = m, ncol = 22))
 results <- data.frame(matrix(nrow = length(combinations), ncol = 22))
 colnames(results) <- c('i', 't', 'coef1_ols', 'coef2_ols', 'sd1_ols', 'sd2_ols', 
                        'coef1_within', 'coef2_within', 'sd1_within', 'sd2_within',
-                       'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible', 'sigma_infeasible', 'df1_inf', 'df2_inf',
-                       'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive', 'sigma_interactive', 'df1_int', 'df2_int')
+                       'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible',
+                       'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive')
 
 
 #--------------------------------------------
@@ -50,7 +52,7 @@ for (c in combinations) {
     #create simulated data
     
     epsilon <- error_function(t, i, mean = 0, sd = 2)
-    source('data_generating2.R')
+    source('./data_generating/data_generating_table_I.R')
     
     #estimate naive-estimator
     
@@ -58,7 +60,9 @@ for (c in combinations) {
     
     #estimate within-estimator
     
-    #temp_results[j, 1:4] <- within_est_2(X, Y, individual = TRUE, time = TRUE) #coeff are right!
+    #temp_results[j, 1:5] <- within_est(X, Y, individual = TRUE, time = TRUE) #coeff are right!
+    temp_results[j, 6:10] <- plm(Y ~ X1 + X2 + X3 + X4 + X5 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))
+    
     
     #estimate infeasible-estimator
     
@@ -67,7 +71,7 @@ for (c in combinations) {
     #estimate interactive-estimator
     
     #temp_results[j, 3:7] <- interactive_est(X, Y, r, 0.0001)
-    temp_results[j, 8:11] <- Eup(Y ~ X[,,1] + X[,,2] + X[,,4] + X[,,5], factor.dim = 2)$slope.para
+    #temp_results[j, 8:11] <- Eup(Y ~ X[,,1] + X[,,2] + X[,,4] + X[,,5], factor.dim = 2)$slope.para
     
   }
   
@@ -77,3 +81,5 @@ for (c in combinations) {
   setTxtProgressBar(progress, iter)
   
 }
+
+write.xlsx(results, './output/table_I.xlsx')
