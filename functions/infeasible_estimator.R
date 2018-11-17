@@ -33,7 +33,7 @@ infeasible_est <- function(X, Y, given = NULL) {
   
   beta <- solve(xx) %*% xy
 
-  W_hat <- Y
+  'W_hat <- Y
   for (j in 1:length(param)) {
     W_hat <- W_hat - X[,,j] * beta[j]
   }
@@ -49,8 +49,8 @@ infeasible_est <- function(X, Y, given = NULL) {
   D_F_diag <- diag(D_F)
   
   variance <- sigma * D_F
-  sd <- sqrt(diag(variance))
+  sd <- sqrt(diag(variance))'
   
-  return(c(beta, sd))
+  return(beta)
   
 }

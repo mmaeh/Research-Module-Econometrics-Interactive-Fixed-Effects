@@ -12,7 +12,7 @@ interactive_est <-
     beta_start[1,] <- within_est(X, Y, individual = FALSE, time = FALSE)
     beta_start[2,] <- within_est(X, Y, individual = TRUE, time = TRUE)
     
-    for (j in 1:2) {
+    for (j in 1:1) {
     
       beta <- beta_start[j,]  
             
