@@ -55,15 +55,18 @@ for (c in combinations) {
     #create simulated data
     
     epsilon <- error_function(t, i, mean = 0, sd = 2)
-    source('data_generating_table_II.R')
+    source('./data_generating/data_generating_table_II.R')
     
     #estimate naive-estimator
     
-    temp_results[j, 1:2] <- within_est(X, Y, individual = FALSE, time = FALSE)
+    #temp_results[j, 1:2] <- within_est(X, Y, individual = FALSE, time = FALSE)
     
     #estimate within-estimator
     
-    temp_results[j, 5:6] <- within_est_2(X, Y, individual = TRUE, time = TRUE) #coeff are right!
+    temp_results[j, 5:8] <- within_est(X, Y, individual = TRUE, time = TRUE) #coeff are right!
+    temp_results[j, 7:8] <- plm(Y ~ X1 + X2 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))$coefficients
+    ab <- plm(Y ~ X1 + X2 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))
+    vcovHC(ab)
     
     #estimate infeasible-estimator
     

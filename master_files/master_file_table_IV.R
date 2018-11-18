@@ -48,13 +48,14 @@ iter <- 0
 for (c in combinations) {
   
   c(i, t) %<-% combinations[[iter + 1]]
+  results[iter + 1, 1:2] %<-% c(i, t)
   
   for (j in 1:m) {
     
     #create simulated data
     
     epsilon <- error_function(t, i, mean = 0, sd = sqrt(2), cross_corr = TRUE, rho = 0.7)
-    source('data_generating.R')
+    source('./data_generating/data_generating_table_III_IV.R')
     
     #estimate naive-estimator
     
@@ -62,7 +63,10 @@ for (c in combinations) {
     
     #estimate within-estimator
     
-    temp_results[j, 1:4] <- within_est_2(X, Y, individual = TRUE, time = TRUE) #coeff are right!
+    temp_results[j, 1:4] <- within_est(X, Y, individual = TRUE, time = TRUE) #coeff are right!
+    #ab <- plm(Y ~ X1 + X2 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))
+    #residuals <- ab$residuals
+    #fitted <- as.numeric(ab$model[[1]] - ab$residuals) 
     
     #estimate infeasible-estimator
     
@@ -70,12 +74,12 @@ for (c in combinations) {
     
     #estimate interactive-estimator
     
-    temp_results[j, 13:14] <- interactive_est(X, Y, r, 0.0001)
-    temp_results[j, 15:16] <- Eup(Y ~ -1 + X[,,1] + X[,,2], factor.dim = 2)$slope.para
+    #temp_results[j, 13:14] <- interactive_est(X, Y, r, 0.0001)
+    #temp_results[j, 15:16] <- Eup(Y ~ -1 + X[,,1] + X[,,2], factor.dim = 2)$slope.para
     
   }
   
-  results[iter + 1,] <- colMeans(temp_results, na.rm = TRUE)  
+  results[iter + 1, 3:22] <- colMeans(temp_results, na.rm = TRUE)  
   
   iter <- iter + 1 
   setTxtProgressBar(progress, iter)

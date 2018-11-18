@@ -29,12 +29,12 @@ r <- 2
 m <- 1000
 
 #container to store results
-temp_results <- data.frame(matrix(nrow = m, ncol = 22))
+temp_results <- data.frame(matrix(nrow = m, ncol = 20))
 results <- data.frame(matrix(nrow = length(combinations), ncol = 22))
-colnames(results) <- c('coef1_ols', 'coef2_ols', 'sd1_ols', 'sd2_ols', 
+colnames(results) <- c('i', 't', 'coef1_ols', 'coef2_ols', 'sd1_ols', 'sd2_ols', 
                       'coef1_within', 'coef2_within', 'sd1_within', 'sd2_within',
-                      'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible', 'sigma_infeasible', 'df1_inf', 'df2_inf',
-                      'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive', 'sigma_interactive', 'df1_int', 'df2_int')
+                      'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible', 
+                      'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive')
 
 
 #--------------------------------------------
@@ -48,13 +48,14 @@ iter <- 0
 for (c in combinations) {
   
   c(i, t) %<-% combinations[[iter + 1]]
+  results[iter + 1, 1:2] %<-% c(i, t)
   
   for (j in 1:m) {
     
     #create simulated data
     
-    epsilon <- error_function(t, i, sd = 2, cross_corr = TRUE, rho = 0.7)
-    source('data_generating.R')
+    epsilon <- error_function(t, i, mean = 0, sd = 2)
+    source('./data_generating/data_generating_table_III_IV.R')
     
     #estimate naive-estimator
     
@@ -62,19 +63,23 @@ for (c in combinations) {
     
     #estimate within-estimator
     
-    temp_results[j, 5:8] <- within_est(X, Y, individual = TRUE, time = TRUE)
+    #temp_results[j, 5:8] <- within_est(X, Y, individual = TRUE, time = TRUE)
     
     #estimate infeasible-estimator
     
-    temp_results[j, 9:12] <- infeasible_est(X, Y, given = "factors")
+    #temp_results[j, 9:12] <- infeasible_est(X, Y, given = "factors")
     
     #estimate interactive-estimator
-  
-    temp_results[j, 13:19] <- interactive_est(X, Y, r, 0.0001)
+    
+    temp_results[j, 9:12] <- interactive_est_2(X, Y, r, 0.0001)  
+    temp_results[j, 13:16] <- interactive_est(X, Y, r, 0.0001)
+    test <- Eup(Y ~ X[,,1] + X[,,2] - 1, additive.effects = "none", factor.dim = 2)
+    test <- summary(test)
+    temp_results[j, 6:9] <- test$coefficients[1:4]
       
   }
 
-results[iter + 1,] <- colMeans(temp_results, na.rm = TRUE)  
+results[iter + 1, 3:22] <- colMeans(temp_results, na.rm = TRUE)  
     
 iter <- iter + 1 
 setTxtProgressBar(progress, iter)

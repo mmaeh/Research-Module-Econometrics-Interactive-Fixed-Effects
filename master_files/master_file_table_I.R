@@ -26,12 +26,14 @@ r <- 2
 m <- 1000
 
 #container to store results
-temp_results <- data.frame(matrix(nrow = m, ncol = 22))
-results <- data.frame(matrix(nrow = length(combinations), ncol = 22))
-colnames(results) <- c('i', 't', 'coef1_ols', 'coef2_ols', 'sd1_ols', 'sd2_ols', 
-                       'coef1_within', 'coef2_within', 'sd1_within', 'sd2_within',
-                       'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible',
-                       'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive')
+temp_results <- data.frame(matrix(nrow = m, ncol = 30))
+results <- data.frame(matrix(nrow = length(combinations), ncol = 32))
+colnames(results) <- c('i', 't', 'coef1_ols', 'coef2_ols', 'coef3_ols', 'coef4_ols', 'coef5_ols', 
+                       'sd1_ols', 'sd2_ols', 'sd4_ols', 'sd4_ols', 'sd5_ols', 
+                       'coef1_infeasible', 'coef2_infeasible', 'coef3_infeasible', 'coef4_infeasible', 'coef5_infeasible', 
+                       'sd1_infeasible', 'sd2_infeasible', 'sd3_infeasible', 'sd4_infeasible', 'sd5_infeasible',
+                       'coef1_interactive', 'coef2_interactive', 'coef3_interactive', 'coef4_interactive', 'coef5_interactive',
+                       'sd1_interactive', 'sd2_interactive', 'sd3_interactive', 'sd4_interactive', 'sd5_interactive')
 
 
 #--------------------------------------------
@@ -56,22 +58,16 @@ for (c in combinations) {
     
     #estimate naive-estimator
     
-    #temp_results[j, 1:4] <- within_est(X, Y, individual = FALSE, time = FALSE)
-    
-    #estimate within-estimator
-    
-    #temp_results[j, 1:5] <- within_est(X, Y, individual = TRUE, time = TRUE) #coeff are right!
-    temp_results[j, 6:10] <- plm(Y ~ X1 + X2 + X3 + X4 + X5 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))
-    
-    
+    #temp_results[j, 1:5] <- within_est(X, Y, individual = FALSE, time = FALSE)
+
     #estimate infeasible-estimator
     
-    #temp_results[j, 9:12] <- infeasible_est(X, Y, given = "factors") #coeff seem right as well
+    temp_results[j, 6:10] <- infeasible_est(X, Y, given = "factors") 
     
     #estimate interactive-estimator
     
-    #temp_results[j, 3:7] <- interactive_est(X, Y, r, 0.0001)
-    #temp_results[j, 8:11] <- Eup(Y ~ X[,,1] + X[,,2] + X[,,4] + X[,,5], factor.dim = 2)$slope.para
+    #temp_results[j, 6:10] <- interactive_est(X, Y, r, 0.0001) #!!Not possible to take within-estimator as a starting value!!
+    #temp_results[j, 1:4] <- Eup(Y ~ X[,,1] + X[,,2] + X[,,4] + X[,,5], factor.dim = 2)$slope.para
     
   }
   

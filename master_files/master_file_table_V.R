@@ -56,7 +56,7 @@ for (c in combinations) {
     #create simulated data
     
     epsilon <- error_function(t, i, hetero = TRUE)
-    source('data_generating_lagged_dep.R')
+    source('./data_generating/data_generating_table_V.R')
     
     #estimate naive-estimator
     
@@ -64,8 +64,8 @@ for (c in combinations) {
     
     #estimate within-estimator
     
-    temp_results[j, 7:9] <- within_est(X, Y, individual = TRUE, time = TRUE) #same coeff as plm
-    #temp_results[j, 10:12] <- plm(Y ~ X1 + X2 + X3 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))$coefficients
+    #temp_results[j, 7:9] <- within_est(X, Y, individual = TRUE, time = TRUE) #same coeff as plm
+    temp_results[j, 10:12] <- plm(Y ~ X1 + X2 + X3 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))$coefficients
     
     #estimate infeasible-estimator
     
@@ -85,4 +85,4 @@ for (c in combinations) {
   
 }
 
-write.xlsx(results, './output/table_V.xlsx'))
+write.xlsx(results, './output/table_V.xlsx')
