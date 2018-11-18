@@ -7,10 +7,10 @@ interactive_est <-
     xxinv <- xx_inv(X)
     
     beta_start <- matrix(0, nrow = 2, ncol = p)
-    beta_opt <- matrix(0, nrow = 2, ncol = p)
-    sigma_opt <- matrix(0, nrow = 2, ncol = 1)
-    beta_start[1,] <- within_est(X, Y, individual = FALSE, time = FALSE)
-    beta_start[2,] <- within_est(X, Y, individual = TRUE, time = TRUE)
+    beta_opt <- matrix(NA, nrow = 2, ncol = p)
+    sigma_opt <- matrix(NA, nrow = 2, ncol = 1)
+    beta_start[1,] <- within_est(X, Y, individual = FALSE, time = FALSE)[1:p]
+    beta_start[2,] <- within_est(X, Y, individual = TRUE, time = TRUE)[1:p]
     
     for (j in 1:1) {
     
@@ -45,11 +45,11 @@ interactive_est <-
       
       sigma <- tr(err %*% t(err)) / ((i - r) * (t - r) - p)
           
-      'D_F <- parameter_variance(X, fac_hat, load_hat)
+      D_F <- parameter_variance(X, fac_hat, load_hat)
       D_F_diag <- diag(D_F)
       
       variance <- sigma * D_F
-      sd <- sqrt(diag(variance))'
+      sd <- sqrt(diag(variance))
       
       beta_opt[j,] <- beta
       
@@ -57,6 +57,6 @@ interactive_est <-
     
     }
     
-    return(beta_opt[which.min(sigma_opt),])
+    return(c(beta_opt[which.min(sigma_opt),], sd))
     
   }
