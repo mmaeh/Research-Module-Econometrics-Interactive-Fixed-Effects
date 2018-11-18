@@ -3,8 +3,10 @@ within_est <- function(X,
                        individual = FALSE,
                        time = FALSE) {
   c(t, i, p) %<-% dim(X)
+  
   xx <- matrix(0, nrow = p, ncol = p)
   xy <- matrix(0, nrow = p, ncol = 1)
+  X_dem <- array(data = NA, dim = c(t, i, p))
   
   M_i <- diag(1, i)
   M_t <- diag(1, t)
@@ -23,6 +25,7 @@ within_est <- function(X,
     for (k in j:p) {
       x_j_fe <- M_t %*% X[, , j] %*% M_i
       x_k_fe <- M_t %*% X[, , k] %*% M_i
+      X_dem[,,j] <- x_j_fe
       xx[j, k] <- tr(t(x_j_fe) %*% x_k_fe)
       xx[k, j] <- xx[j, k]
       
@@ -32,15 +35,16 @@ within_est <- function(X,
   
   beta <- solve(xx) %*% xy
   
-  err <- Y
-  for (j in 1:length(param)) {
-    err <- err - X[,,j] * beta[j]
+  err <- M_t %*% Y %*% M_i
+  for (j in 1:p) {
+    err <- err - X_dem[,,j] * beta[j]
   }
-  sigma <- tr(err %*% t(err)) / (i * (t - 1) - p) #denominator taken from wooldridge p. 306
   
-  var <- sigma * xx_inv(X)
-  sd <- sqrt(diag(var))
+  sigma <- tr(err %*% t(err)) / (i * t - t - i - p) 
+
+  var_beta <- sigma * solve(xx)
+  sd_beta <- sqrt(diag(var_beta))
   
-  return(beta)
+  return(c(beta, sd_beta))
   
 }
