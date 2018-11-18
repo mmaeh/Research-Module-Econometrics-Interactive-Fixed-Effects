@@ -26,7 +26,7 @@ for (k in 1:length(param)) {
 
 
 
-plm_df <- data.frame(matrix(nrow = i*t, ncol = 8))
+"plm_df <- data.frame(matrix(nrow = i*t, ncol = 8))
 colnames(plm_df) <- c('i', 't', 'Y', 'X1', 'X2', 'X3', 'X4', 'X5')
 
 plm_df$i <- rep(1:i, each = t)
@@ -40,4 +40,4 @@ for (j in 1:i) {
   plm_df[(((j-1)*t+1):(j*t)), 'X4'] <- X[,j,4]
   plm_df[(((j-1)*t+1):(j*t)), 'X5'] <- X[,j,5]
   
-}
+}"
