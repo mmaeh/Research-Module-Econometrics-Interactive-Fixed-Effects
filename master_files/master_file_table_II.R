@@ -26,7 +26,7 @@ combinations <- list(
 #constants used
 param <- c(1, 3)
 r <- 2
-m <- 1000
+m <- 200
 
 #container to store results
 temp_results <- data.frame(matrix(nrow = m, ncol = 16))
@@ -50,7 +50,7 @@ for (c in combinations) {
   c(i, t) %<-% combinations[[iter + 1]]
   results[iter + 1, 1:2] %<-% c(i, t)
   
-  for (j in 1:m) {
+  for (q in 1:m) {
     
     #create simulated data
     
@@ -63,20 +63,21 @@ for (c in combinations) {
     
     #estimate within-estimator
     
-    temp_results[j, 5:8] <- within_est(X, Y, individual = TRUE, time = TRUE) #coeff are right!
-    temp_results[j, 7:8] <- plm(Y ~ X1 + X2 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))$coefficients
-    ab <- plm(Y ~ X1 + X2 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))
-    vcovHC(ab)
+    temp_results[q, 5:6] <- within_est(X, Y, individual = TRUE, time = TRUE) #coeff are right!
     
     #estimate infeasible-estimator
     
-    #temp_results[j, 9:10] <- infeasible_est(X, Y, given = "factors") #coeff seem right as well
+    temp_results[q, 9:10] <- infeasible_est(X, Y, given = "factors") #coeff seem right as well
     
     #estimate interactive-estimator
     
-    temp_results[j, 11:12] <- interactive_est(X, Y, r, 0.0001)
-    temp_results[j, 13:13] <- Eup(Y ~ X[,,1] + X[,,2] - 1, factor.dim = 2)$slope.para
+    temp_results[q, 13:14] <- interactive_est_2(X, Y, r, beta_start = "OLS", 0.0001)
+    #temp_results[j, 13:13] <- Eup(Y ~ X[,,1] + X[,,2] - 1, factor.dim = 2)$slope.para
     
+  }
+  
+  for (k in c(7, 8, 11, 12, 15, 16)) {
+    temp_results[, k] <- sqrt(mean((temp_results[, k - 2] - mean(temp_results[, k - 2]))^2))  
   }
   
   results[iter + 1, 3:18] <- colMeans(temp_results, na.rm = TRUE)  

@@ -23,13 +23,12 @@ combinations <- list(
 #parameters and constants used
 param <- c(1, 3, 5, 2, 4)
 r <- 2
-m <- 1000
+n_rep <- 1000
 
 #container to store results
-temp_results <- data.frame(matrix(nrow = m, ncol = 30))
-results <- data.frame(matrix(nrow = length(combinations), ncol = 32))
-colnames(results) <- c('i', 't', 'coef1_ols', 'coef2_ols', 'coef3_ols', 'coef4_ols', 'coef5_ols', 
-                       'sd1_ols', 'sd2_ols', 'sd4_ols', 'sd4_ols', 'sd5_ols', 
+temp_results <- data.frame(matrix(nrow = m, ncol = 20))
+results <- data.frame(matrix(nrow = length(combinations), ncol = 22))
+colnames(results) <- c('i', 't', 
                        'coef1_infeasible', 'coef2_infeasible', 'coef3_infeasible', 'coef4_infeasible', 'coef5_infeasible', 
                        'sd1_infeasible', 'sd2_infeasible', 'sd3_infeasible', 'sd4_infeasible', 'sd5_infeasible',
                        'coef1_interactive', 'coef2_interactive', 'coef3_interactive', 'coef4_interactive', 'coef5_interactive',
@@ -49,7 +48,7 @@ for (c in combinations) {
   c(i, t) %<-% combinations[[iter + 1]]
   results[iter + 1, 1:2] %<-% c(i, t)
   
-  for (j in 1:m) {
+  for (rep in 1:n_rep) {
     
     #create simulated data
     
@@ -58,17 +57,21 @@ for (c in combinations) {
     
     #estimate naive-estimator
     
-    #temp_results[j, 1:5] <- within_est(X, Y, individual = FALSE, time = FALSE)
+    #temp_results[rep, 1:5] <- within_est(X, Y, individual = FALSE, time = FALSE)
 
     #estimate infeasible-estimator
     
-    temp_results[j, 6:10] <- infeasible_est(X, Y, given = "factors") 
+    temp_results[rep, 1:5] <- infeasible_est(X, Y, given = "factors") 
     
     #estimate interactive-estimator
     
-    #temp_results[j, 6:10] <- interactive_est(X, Y, r, 0.0001) #!!Not possible to take within-estimator as a starting value!!
-    #temp_results[j, 1:4] <- Eup(Y ~ X[,,1] + X[,,2] + X[,,4] + X[,,5], factor.dim = 2)$slope.para
+    temp_results[rep, 11:15] <- interactive_est_2(X, Y, r, beta_start = "OLS", 0.0001) #!!Not possible to take within-estimator as a starting value!!
+    #temp_results[rep, 1:4] <- Eup(Y ~ X[,,1] + X[,,2] + X[,,4] + X[,,5], factor.dim = 2)$slope.para
     
+  }
+  
+  for (k in c(6, 7, 8, 9, 10, 16, 17, 18, 19, 20)) {
+    temp_results[, k] <- sqrt(mean((temp_results[, k - 5] - mean(temp_results[, k - 5]))^2))  
   }
   
   results[iter + 1, 3:22] <- colMeans(temp_results, na.rm = TRUE)  

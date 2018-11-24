@@ -26,11 +26,11 @@ combinations <- list(
 #constants used
 param <- c(1, 3)
 r <- 2
-m <- 1000
+m <- 600
 
 #container to store results
-temp_results <- data.frame(matrix(nrow = m, ncol = 20))
-results <- data.frame(matrix(nrow = length(combinations), ncol = 22))
+temp_results <- data.frame(matrix(nrow = m, ncol = 16))
+results <- data.frame(matrix(nrow = length(combinations), ncol = 18))
 colnames(results) <- c('i', 't', 'coef1_ols', 'coef2_ols', 'sd1_ols', 'sd2_ols', 
                       'coef1_within', 'coef2_within', 'sd1_within', 'sd2_within',
                       'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible', 
@@ -50,7 +50,7 @@ for (c in combinations) {
   c(i, t) %<-% combinations[[iter + 1]]
   results[iter + 1, 1:2] %<-% c(i, t)
   
-  for (j in 1:m) {
+  for (q in 1:m) {
     
     #create simulated data
     
@@ -59,30 +59,30 @@ for (c in combinations) {
     
     #estimate naive-estimator
     
-    #temp_results[j, 1:4] <- within_est(X, Y, individual = FALSE, time = FALSE)
+    #temp_results[j, 1:2] <- within_est(X, Y, individual = FALSE, time = FALSE)
     
     #estimate within-estimator
     
-    #temp_results[j, 5:8] <- within_est(X, Y, individual = TRUE, time = TRUE)
+    temp_results[q, 5:6] <- within_est(X, Y, individual = TRUE, time = TRUE)
     
     #estimate infeasible-estimator
     
-    #temp_results[j, 9:12] <- infeasible_est(X, Y, given = "factors")
+    temp_results[q, 9:10] <- infeasible_est(X, Y, given = "factors")
     
     #estimate interactive-estimator
     
-    temp_results[j, 9:12] <- interactive_est_2(X, Y, r, 0.0001)  
-    temp_results[j, 13:16] <- interactive_est(X, Y, r, 0.0001)
-    test <- Eup(Y ~ X[,,1] + X[,,2] - 1, additive.effects = "none", factor.dim = 2)
-    test <- summary(test)
-    temp_results[j, 6:9] <- test$coefficients[1:4]
+    temp_results[q, 13:14] <- interactive_est_2(X, Y, r, 0.0001)  
       
   }
 
-results[iter + 1, 3:22] <- colMeans(temp_results, na.rm = TRUE)  
-    
-iter <- iter + 1 
-setTxtProgressBar(progress, iter)
+  for (k in c(7, 8, 11, 12, 15, 16)) {
+    temp_results[, k] <- sqrt(mean((temp_results[, k - 2] - mean(temp_results[, k - 2]))^2))  
+  }
+  
+  results[iter + 1, 3:18] <- colMeans(temp_results, na.rm = TRUE)
+
+  iter <- iter + 1 
+  setTxtProgressBar(progress, iter)
 
 }
 

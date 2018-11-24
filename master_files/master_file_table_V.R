@@ -54,18 +54,19 @@ for (c in combinations) {
   for (j in 1:m) {
     
     #create simulated data
+    burn_in <- 100
     
-    epsilon <- error_function(t, i, hetero = TRUE)
+    epsilon <- error_function(t + burn_in, i, hetero = TRUE)
     source('./data_generating/data_generating_table_V.R')
     
     #estimate naive-estimator
     
-    #temp_results[j, 1:4] <- within_est(X, Y, individual = FALSE, time = FALSE)
+    temp_results[j, 1:3] <- within_est(X, Y, individual = FALSE, time = FALSE)
     
     #estimate within-estimator
     
     #temp_results[j, 7:9] <- within_est(X, Y, individual = TRUE, time = TRUE) #same coeff as plm
-    temp_results[j, 10:12] <- plm(Y ~ X1 + X2 + X3 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))$coefficients
+    #temp_results[j, 10:12] <- plm(Y ~ X1 + X2 + X3 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))$coefficients
     
     #estimate infeasible-estimator
     

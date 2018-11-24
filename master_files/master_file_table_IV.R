@@ -29,12 +29,12 @@ r <- 2
 m <- 1000
 
 #container to store results
-temp_results <- data.frame(matrix(nrow = m, ncol = 22))
-results <- data.frame(matrix(nrow = length(combinations), ncol = 22))
-colnames(results) <- c('coef1_ols', 'coef2_ols', 'sd1_ols', 'sd2_ols', 
+temp_results <- data.frame(matrix(nrow = m, ncol = 16))
+results <- data.frame(matrix(nrow = length(combinations), ncol = 18))
+colnames(results) <- c('i', 't', 'coef1_ols', 'coef2_ols', 'sd1_ols', 'sd2_ols', 
                        'coef1_within', 'coef2_within', 'sd1_within', 'sd2_within',
-                       'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible', 'sigma_infeasible', 'df1_inf', 'df2_inf',
-                       'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive', 'sigma_interactive', 'df1_int', 'df2_int')
+                       'coef1_infeasible', 'coef2_infeasible', 'sd1_infeasible', 'sd2_infeasible', 
+                       'coef1_interactive', 'coef2_interactive', 'sd1_interactive', 'sd2_interactive')
 
 
 #--------------------------------------------
@@ -50,7 +50,7 @@ for (c in combinations) {
   c(i, t) %<-% combinations[[iter + 1]]
   results[iter + 1, 1:2] %<-% c(i, t)
   
-  for (j in 1:m) {
+  for (q in 1:m) {
     
     #create simulated data
     
@@ -63,23 +63,24 @@ for (c in combinations) {
     
     #estimate within-estimator
     
-    temp_results[j, 1:4] <- within_est(X, Y, individual = TRUE, time = TRUE) #coeff are right!
-    #ab <- plm(Y ~ X1 + X2 - 1, data = plm_df, effect = 'twoways', model = 'within', index = c('i', 't'))
-    #residuals <- ab$residuals
-    #fitted <- as.numeric(ab$model[[1]] - ab$residuals) 
+    temp_results[q, 1:2] <- within_est(X, Y, individual = TRUE, time = TRUE) #coeff are right!
     
     #estimate infeasible-estimator
     
-    #temp_results[j, 9:12] <- infeasible_est(X, Y, given = "factors") #coeff seem right as well
+    temp_results[q, 5:6] <- infeasible_est(X, Y, given = "factors") #coeff seem right as well
     
     #estimate interactive-estimator
     
-    #temp_results[j, 13:14] <- interactive_est(X, Y, r, 0.0001)
-    #temp_results[j, 15:16] <- Eup(Y ~ -1 + X[,,1] + X[,,2], factor.dim = 2)$slope.para
+    temp_results[q, 9:10] <- interactive_est_2(X, Y, r, 0.0001)
+    temp_results[q, 13:14] <- Eup(Y ~ -1 + X[,,1] + X[,,2], factor.dim = 2)$slope.para
     
   }
   
-  results[iter + 1, 3:22] <- colMeans(temp_results, na.rm = TRUE)  
+  for (k in c(3, 4, 7, 8, 11, 12, 15, 16)) {
+    temp_results[, k] <- sqrt(mean((temp_results[, k - 2] - mean(temp_results[, k - 2]))^2))  
+  }
+  
+  results[iter + 1, 3:18] <- colMeans(temp_results, na.rm = TRUE)  
   
   iter <- iter + 1 
   setTxtProgressBar(progress, iter)
