@@ -35,16 +35,17 @@ within_est <- function(X,
   
   beta <- solve(xx) %*% xy
   
-  err <- M_t %*% Y %*% M_i
+  "err <- M_t %*% Y %*% M_i
   for (j in 1:p) {
     err <- err - X_dem[,,j] * beta[j]
   }
   
-  sigma <- tr(err %*% t(err)) / (i * t - t - i - p) 
-
-  var_beta <- sigma * solve(xx)
-  sd_beta <- sqrt(diag(var_beta))
+  #sigma <- tr(err %*% t(err)) / (i * t - t - i - p) 
+  sigma <- tr(err %*% t(err)) / (i * t - p)
   
-  return(c(beta, sd_beta))
+  var_beta <- sigma * solve(xx)
+  sd_beta <- sqrt(diag(var_beta))"
+  
+  return(beta)
   
 }
