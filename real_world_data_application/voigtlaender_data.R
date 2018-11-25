@@ -8,7 +8,7 @@ library(stargazer)
 library(xlsx)
 
 # read in data from voigtlaender
-data <- read.dta('C:/Users/maxim/Documents/master eco/research module/Voigtlaender2014.dta')
+data <- read.dta('./real_world_data_application/Voigtlaender2014.dta')
 data <- data[order(data$Sector, data$year), ]
 data[, 'const'] <- 1
 
@@ -173,6 +173,26 @@ for (k in varlist) {
 # this is actually the test supposed by Kneip / Sickles / Song (2012) to test for
 # the presence of interactive FE
 
+## hausman test proposed by BAI
+
+# Model under the null Hypothesis:
+twoways.obj <- Eup(
+  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
+  factor.dim = 0, 
+  additive.effects = "twoways"
+  )
+
+# Model under the alternative Hypothesis:
+not.twoways.obj <- Eup(
+  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
+  factor.dim = 2, 
+  additive.effects = "none"
+  )
+
+# Hausman test:
+checkSpecif(obj1 = twoways.obj, obj2 = not.twoways.obj, level = 0.01)
+
+# test proposed by KNEIP for the model of Bai
 # intialize additive model
 test_model <-
   Eup(
@@ -235,7 +255,7 @@ comparison_table[1:7, 8] <- weighted_interactive5$slope.para
 comparison_table[1:7, 10] <- weighted_interactive6$slope.para
 
 
-write.xlsx(comparison_table, 'C:/Users/maxim/Documents/master eco/research module/comp_table_voiglaender.xlsx')
+write.xlsx(comparison_table, './output/comp_table_voiglaender.xlsx')
 
 stargazer(weighted_1, weighted_2, weighted_3, weighted_4, weighted_5, weighted_6,
           title = "Results",
@@ -277,6 +297,8 @@ coeftest(unweighted_3, vcov = vcovHC(weighted_3, type = "HC0", cluster = "group"
 summary(data[, varlist]) # only NAs in "Outs_na", "Outs_diff" 
 data[which(is.na(data[, "Outs_diff"])), c("Sector", "year")] # NAs are not the same
 data[which(is.na(data[, "Outs_na"])), c("Sector", "year")]
+
+unique(data[which(is.na(data[, "Outs_na"])), "year"])
 
 ########################################
 # R^2 computation for original models
