@@ -4,14 +4,16 @@ library(lmtest)
 library(multiwayvcov)
 library(phtt)
 library(plm)
+library(psych)
 library(stargazer)
 library(xlsx)
+library(zeallot)
 
 # read in data from voigtlaender
 data <- read.dta('./real_world_data_application/Voigtlaender2014.dta')
 data <- data[order(data$Sector, data$year), ]
 data[, 'const'] <- 1
-
+data[, 'trend'] <- rep(1:48, times = 358)
 
 # variable list of all variables used in table 3
 varlist <-
@@ -25,7 +27,8 @@ varlist <-
     'HT_diff',
     'RD_int_lag',
     'Outs_na',
-    'Outs_diff'
+    'Outs_diff',
+    'trend'
   )
 
 
@@ -39,17 +42,19 @@ varlist <-
 # weighted data in the context of the interactive model (in the phtt package is no
 # weight argument!).
 data_weighted <- data[, 3:452] * sqrt(data$weight_emp)
-data_weighted <- cbind(data[, c('Sector', 'year')], data_weighted)
+data_weighted <- cbind(data[, c('Sector', 'year', 'trend')], data_weighted)
 
 # time dummy creation. While we just could specify twoways fixed effects within plm
 # the estimates from voiglaender also rely on dummy variables in the case of time
 # fixed effects. Due to dgf adjustment in the manual case the estimates wouldnt be 
 # the same.
 time_dummies <- "dummy_t1"
+varlist <- append(varlist, "dummy_t1")
 
 for (i in 2:48) {
   temp_dummy <- paste("dummy_t", i, sep = "")
   time_dummies <- paste(time_dummies, temp_dummy, sep = "+")
+  varlist <- append(varlist, paste("dummy_t", i, sep = ""))
 }
 
 
@@ -163,9 +168,13 @@ dimnames(vars_weighted)[[3]] <- varlist
 for (k in varlist) {
   for (j in 1:i) {
     vars[1:t, j, k] <- data[(t * (j - 1) + 1):(t * j), k]
-  }
-  if (k != 'weight_emp') {
-    vars_weighted[, , k] <- vars[, , k] * sqrt(vars[, , 'weight_emp'])
+    if (k != 'weight_emp') {
+      if (k == 'trend') {
+        vars_weighted[, , k] <- vars[,,k]
+      } else{
+        vars_weighted[, , k] <- vars[, , k] * sqrt(vars[, , 'weight_emp'])
+      }
+    }
   }
 }
 
@@ -197,7 +206,7 @@ checkSpecif(obj1 = twoways.obj, obj2 = not.twoways.obj, level = 0.01)
 test_model <-
   Eup(
     vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
-    additive.effects = 'twoways'
+    additive.effects = 'individual'
   )
 # test for interactive FE, H0: additive model --> clearly rejects H0
 checkSpecif(test_model, level = 0.01)
@@ -213,10 +222,24 @@ summary(weighted_interactive3)
 
 # column 4
 weighted_interactive4 <- Eup(
-  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff']
+  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
+  additive.effects = 'individual',
+  dim.criterion = 'IPC1'
 )
 
-summary(weighted_interactive4)
+residuals <- weighted_interactive4$residuals
+factors <- weighted_interactive4$unob.factors
+loadings <- weighted_interactive4$ind.loadings
+
+plot(summary(weighted_interactive4))
+
+opt_obj <- OptDim(weighted_interactive4)
+
+plot(opt_obj)
+
+parameter_variance(vars_weighted[,,c('s_h_avg', 'equip_pw', 'OCAMovK', 'HT_diff')], factors, loadings, residuals)
+
+
 
 # column 5
 weighted_interactive5 <- Eup(
@@ -320,4 +343,16 @@ r2_weighted3 <-
     data = data_weighted
   )
 
+
+x <- matrix(rep(1:48, times = 358), nrow = 48, ncol = 358)
+
+vars_weighted[,,'trend'] <- matrix(rep(1:48, times = 358), nrow = 48, ncol = 358)
+
+
+
+weighted_interactive4 <- Eup(
+  get_matrix_formula("h", c("s_h_avg", "equip_pw", "OCAMovK", "HT_diff", "trend")),
+  additive.effects = 'individual',
+  dim.criterion = 'IPC2'
+)
 
