@@ -41,7 +41,7 @@ interactive_est_3 <-
       }
       
       err <- Y - fac_hat %*% t(load_hat)
-      for (n in 1:length(param)) {
+      for (n in 1:length(beta)) {
         err <- err - X[,,n] * beta[n]
       }
       
