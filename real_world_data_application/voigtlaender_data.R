@@ -1,9 +1,11 @@
 library(foreign)
+library(ggplot2)
 library(lfe)
 library(lmtest)
 library(multiwayvcov)
 library(phtt)
 library(plm)
+library(plotly)
 library(psych)
 library(stargazer)
 library(xlsx)
@@ -14,6 +16,10 @@ data <- read.dta('./real_world_data_application/Voigtlaender2014.dta')
 data <- data[order(data$Sector, data$year), ]
 data[, 'const'] <- 1
 data[, 'trend'] <- rep(1:48, times = 358)
+data[, 'h_lag'] <-
+  unlist(tapply(data$h, data$Sector, function(x) {
+    c(NA, x[-length(x)])
+  }))
 
 # variable list of all variables used in table 3
 varlist <-
@@ -28,7 +34,8 @@ varlist <-
     'RD_int_lag',
     'Outs_na',
     'Outs_diff',
-    'trend'
+    'trend',
+    'h_lag'
   )
 
 
@@ -41,8 +48,8 @@ varlist <-
 # showing the equivalence of the results, we show that we can just use the manually
 # weighted data in the context of the interactive model (in the phtt package is no
 # weight argument!).
-data_weighted <- data[, 3:452] * sqrt(data$weight_emp)
-data_weighted <- cbind(data[, c('Sector', 'year', 'trend')], data_weighted)
+data_weighted <- data[, 3:454] * sqrt(data$weight_emp)
+data_weighted <- cbind(data[, c('Sector', 'year')], data_weighted)
 
 # time dummy creation. While we just could specify twoways fixed effects within plm
 # the estimates from voiglaender also rely on dummy variables in the case of time
@@ -104,6 +111,10 @@ weighted_4 <-
     model = 'within',
     index = c('Sector', 'year')
   )
+
+testmodel1 <- plm(h ~ s_h_avg + equip_pw + OCAMovK + HT_diff, data = data_weighted, model = "within", effect = "individual")
+testmodel2 <- plm(h ~ s_h_avg + equip_pw + OCAMovK + HT_diff, data = data_weighted, model = "within", effect = "twoways")
+phtest(testmodel, testmodel2)
 
 coeftest(weighted_4, vcov = vcovHC(weighted_4, type = "HC1", cluster = "group"))
 
@@ -222,9 +233,8 @@ summary(weighted_interactive3)
 
 # column 4
 weighted_interactive4 <- Eup(
-  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
-  additive.effects = 'individual',
-  dim.criterion = 'IPC1'
+  vars_weighted[, , 'h'] ~ -1 + vars_weighted[,,'h_lag'] + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
+  additive.effects = 'individual'
 )
 
 residuals <- weighted_interactive4$residuals
@@ -238,7 +248,6 @@ opt_obj <- OptDim(weighted_interactive4)
 plot(opt_obj)
 
 parameter_variance(vars_weighted[,,c('s_h_avg', 'equip_pw', 'OCAMovK', 'HT_diff')], factors, loadings, residuals)
-
 
 
 # column 5
@@ -356,3 +365,57 @@ weighted_interactive4 <- Eup(
   dim.criterion = 'IPC2'
 )
 
+
+data_weighted[,'resid'] <- sapply(seq(1:17184), function(x) weighted_4$residuals[[x]]) 
+data_weighted[,'resid_stan'] <- sapply(data_weighted['resid'], function(x) (x - mean(data_weighted[,'resid'])) / sd(data_weighted[,'resid']))
+data_weighted[,'fitted'] <- sapply(seq(1:17184), function(x) (weighted_4$model[[1]][[x]] - weighted_4$residuals[[x]]))
+ggplot(data_weighted, aes(x=fitted,y=resid_stan, colour = factor(Sector))) +
+  geom_point()+geom_hline(yintercept=0)+geom_smooth()
+
+
+data_weighted[,'resid_inter'] <- as.vector(weighted_interactive4$residuals)
+data_weighted[,'resid_inter_stan'] <- sapply(data_weighted['resid_inter'], function(x) (x - mean(data_weighted[,'resid_inter'])) / sd(data_weighted[,'resid_inter']))
+data_weighted[,'fitted_inter'] <- as.vector(weighted_interactive4$fitted.values)
+ggplot(data_weighted, aes(x=fitted_inter,y=resid_inter_stan, color = factor(Sector))) +
+  geom_point()+geom_hline(yintercept=0)+geom_smooth()
+
+
+resid <- as.vector(weighted_interactive4$residuals)
+resid <- sapply(resid, function(x) (x - mean(resid)) / sd(resid))
+data_weighted['x'] <- qnorm(ppoints(resid))
+ggplot(data_weighted, aes(x=x, y=resid_inter_stan)) +
+  geom_point() +
+  geom_line(aes(x=x, y=x)) 
+
+
+ggplot(data_weighted, aes(x=year, y=h, colour = factor(Sector))) +
+  geom_point()
+
+p <- plot_ly(x = data_weighted$year, y = data_weighted$Sector, z = data_weighted$resid_stan) 
+add_mesh(p)
+
+
+results_1 <- matrix(NA, nrow = 4, ncol = 12)
+
+for (i in 1:6) {
+  eup_model <- summary(weighted_interactive4 <- Eup(
+    vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
+    additive.effects = 'individual',
+    factor.dim = i
+  ))
+  
+  results_1[, ((i-1)*2 + 1):(i*2)] <- eup_model$coefficients[, 1:2]
+}
+
+
+results_2 <- matrix(NA, nrow = 5, ncol = 12)
+
+for (i in 1:6) {
+  eup_model <- summary(weighted_interactive4 <- Eup(
+    vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 'h_lag'] +vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
+    additive.effects = 'individual',
+    factor.dim = i
+  ))
+  
+  results_2[, ((i-1)*2 + 1):(i*2)] <- eup_model$coefficients[, 1:2]
+}    
