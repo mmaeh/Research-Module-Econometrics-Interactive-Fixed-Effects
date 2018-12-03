@@ -11,3 +11,4 @@ X[,,1] <- 1 + fac %*% t(load) + matrix(1, nrow = t, ncol = r) %*% t(load) + fac 
 X[,,2] <- 1 + fac %*% t(load) + matrix(1, nrow = t, ncol = r) %*% t(load) + fac %*% matrix(1, nrow = r, ncol = i) + matrix(rnorm(t * i), nrow = t, ncol = i)
 
 Y <- X[,,1] * param[1] + X[,,2] * param[2] + fac %*% t(load) + epsilon
+
