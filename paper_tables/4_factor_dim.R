@@ -10,13 +10,11 @@ sapply(function.sources, source, .GlobalEnv)
 
 #combinations of i and t to use in simulation
 combinations <- list(
-  c(100, 3),
   c(100, 5),
   c(100, 10),
   c(100, 20),
   c(100, 50),
   c(100, 100),
-  c(3, 100),
   c(5, 100),
   c(10, 100),
   c(20, 100),
@@ -29,7 +27,7 @@ r <- 2
 n_rep <- 1000
 
 #container to store results
-temp_results <- data.frame(matrix(nrow = m, ncol = 24))
+temp_results <- data.frame(matrix(nrow = n_rep, ncol = 24))
 results <- data.frame(matrix(nrow = length(combinations), ncol = 26))
 colnames(results) <- c('i', 't', 
                        'R0_coef1', 'R0_sd1', 'R0_coef2', 'R0_sd2',
@@ -85,5 +83,5 @@ for (c in combinations) {
 
 }
 
-saveRDS(results, './output/table_IV.rds')
-write.csv(results, './output/table_IV.csv')
+saveRDS(results, './output/table_factordim.rds')
+write.csv(results, './output/table_factordim.csv')

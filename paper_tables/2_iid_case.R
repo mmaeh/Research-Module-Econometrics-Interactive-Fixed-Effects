@@ -2,6 +2,7 @@
 library('phtt')
 library('psych')
 library('xlsx')
+library('xtable')
 library('zeallot')
 
 #functions used in the following
@@ -31,7 +32,7 @@ n_rep <- 1000
 #container to store results
 temp_results <- data.frame(matrix(nrow = n_rep, ncol = 16))
 results <- data.frame(matrix(nrow = length(combinations), ncol = 18))
-colnames(results) <- c('i', 't', 'coef1_ols', 'sd1_ols', 'coef2_ols', 'sd2_ols', 
+colnames(results) <- c('N', 'T', 'coef1_ols', 'sd1_ols', 'coef2_ols', 'sd2_ols', 
                        'coef1_within', 'sd1_within', 'coef2_within', 'sd2_within',
                        'coef1_infeasible', 'sd1_infeasible', 'coef2_infeasible', 'sd2_infeasible',
                        'coef1_interactive', 'sd1_interactive', 'coef2_interactive', 'sd2_interactive')
@@ -89,3 +90,6 @@ for (c in combinations) {
 
 saveRDS(results, './output/table_II.rds')
 write.csv(results, './output/table_II.csv')
+
+table1 <- xtable(results[,c(1:2, 15:26)], digits = 3, auto = TRUE)
+print.xtable(table1)
