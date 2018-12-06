@@ -21,6 +21,9 @@ data[, 'h_lag'] <-
     c(NA, x[-length(x)])
   }))
 
+sic_codes <- read.xlsx('./real_world_data_application/sic_names.xlsx', sheetIndex = 1)
+
+
 # variable list of all variables used in table 3
 varlist <-
   c(
@@ -233,13 +236,22 @@ summary(weighted_interactive3)
 
 # column 4
 weighted_interactive4 <- Eup(
-  vars_weighted[, , 'h'] ~ -1 + vars_weighted[,,'h_lag'] + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
-  additive.effects = 'individual'
+  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
+  additive.effects = 'individual',
+  dim.criterion = 'IPC1'
 )
 
 residuals <- weighted_interactive4$residuals
 factors <- weighted_interactive4$unob.factors
 loadings <- weighted_interactive4$ind.loadings
+
+sectors <- as.data.frame(unique(data['Sector']))
+structure <- as.data.frame(t(weighted_interactive4$unob.fact.stru)[,1])
+struc_by_sectors <- cbind(sectors, structure)
+colnames(struc_by_sectors) <- c('sector', 'structure for t == 1')
+struc_by_sectors <- merge(struc_by_sectors, sic_codes, by = 'sector', all.x = TRUE)
+
+write.xlsx(struc_by_sectors, './output/struc_by_sectors.xlsx')
 
 plot(summary(weighted_interactive4))
 
