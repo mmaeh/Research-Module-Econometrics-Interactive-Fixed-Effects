@@ -1,5 +1,5 @@
 interactive_est_2 <-
-  function(X, Y, r, beta_start = "factor", tolerate) {
+  function(X, Y, R, beta_start = "factor", tolerate) {
     # dimensions of X
     c(t, i, p) %<-% dim(X)
     
@@ -27,7 +27,7 @@ interactive_est_2 <-
       for (h in 1:p) {
         W <- W - X[, , h] * beta[h]
       }
-      c(fac_hat, load_hat, VNT) %<-% factor_est(W, r)
+      c(fac_hat, load_hat, VNT) %<-% factor_est(W, R)
       
       # update beta and compare to previous estimate
       beta <- beta_update(X, xxinv, Y, fac_hat, load_hat)
