@@ -10,7 +10,7 @@ error_function <-
            cross_hetero = FALSE,
            serial_hetero = FALSE) {
     # container matrix
-    epsilon <- epsilon <- rnorm(t * i, mean = mean, sd = sd)
+    epsilon <- matrix(rnorm(t * i, mean = mean, sd = sd), nrow = t, ncol = i)
     
     # warning to specify AR paramter
     if ((cross_corr | serial_corr == TRUE) & (is.na(rho) == TRUE)) {
