@@ -54,7 +54,7 @@ for (c in combinations) {
     
     #create simulated data
     
-    epsilon <- error_function(t, i, mean = 0, sd = sqrt(2), cross_corr = TRUE, rho = 0.7, hetero = TRUE)
+    epsilon <- error_function(t, i, mean = 0, sd = sqrt(2), cross_corr = TRUE, rho = 0.7, cross_hetero = TRUE)
     source('./data_generating/data_generating_table_III_IV.R')
     
     #estimate naive-estimator
