@@ -1,9 +1,8 @@
 burn_in <- 100
 
 load <- matrix(rnorm(i * r), nrow = i, ncol = r)
-fac <- matrix(rnorm(t * r), nrow = t + burn_in, ncol = r)
+fac <- matrix(rnorm((t + burn_in) * r), nrow = t + burn_in, ncol = r)
 
-#epsilon <- matrix(rnorm(i * t, sd = 2), nrow = t, ncol = i)
 epsilon <- epsilon
 
 X <- array(data = NA, dim = c(t + burn_in, i, length(param)))
@@ -11,7 +10,6 @@ Y <- matrix(0, nrow = t + burn_in, ncol = i)
 
 X[,,1] <- 1 + fac %*% t(load) + matrix(1, nrow = t + burn_in, ncol = r) %*% t(load) + fac %*% matrix(1, nrow = r, ncol = i) + matrix(rnorm(t * i), nrow = t + burn_in, ncol = i)
 X[,,2] <- 1 + fac %*% t(load) + matrix(1, nrow = t + burn_in, ncol = r) %*% t(load) + fac %*% matrix(1, nrow = r, ncol = i) + matrix(rnorm(t * i), nrow = t + burn_in, ncol = i)
-
 
 
 for (j in 1:(t+burn_in)) {
@@ -25,6 +23,7 @@ for (j in 1:(t+burn_in)) {
 X[burn_in:(burn_in + t),,3] <- Y[(burn_in - 1):(t + burn_in - 1),]
 X <- X[(burn_in + 1):(t + burn_in),,]
 Y <- Y[(burn_in + 1):(t + burn_in),]
+fac <- fac[(burn_in + 1):(t + burn_in),]
 
 "plm_df <- data.frame(matrix(nrow = i*(t-1), ncol = 6))
 colnames(plm_df) <- c('i', 't', 'Y', 'X1', 'X2', 'X3')

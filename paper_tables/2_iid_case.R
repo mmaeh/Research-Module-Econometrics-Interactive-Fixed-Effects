@@ -26,7 +26,7 @@ combinations <- list(
 
 #constants used
 param <- c(1, 3)
-r <- 2
+R <- 2
 n_rep <- 1000
 
 #container to store results
@@ -48,14 +48,14 @@ iter <- 0
 
 for (c in combinations) {
   
-  c(i, t) %<-% combinations[[iter + 1]]
-  results[iter + 1, 1:2] %<-% c(i, t)
+  c(N, T) %<-% combinations[[iter + 1]]
+  results[iter + 1, 1:2] %<-% c(N, T)
   
   for (rep in 1:n_rep) {
     
     #create simulated data
     
-    epsilon <- error_function(t, i, mean = 0, sd = 2)
+    epsilon <- error_function(T, N, mean = 0, sd = 2)
     source('./data_generating/data_generating_table_III_IV.R')
     
     #estimate naive-estimator
@@ -72,7 +72,7 @@ for (c in combinations) {
     
     #estimate interactive-estimator
     
-    temp_results[rep, c(13, 15)] <- interactive_est_2(X, Y, r, beta_start = 'factor', 0.0001)  
+    temp_results[rep, c(13, 15)] <- interactive_est_2(X, Y, R, beta_start = 'factor', 0.0001)  
     
     setTxtProgressBar(progress, iter * n_rep + rep)  
     

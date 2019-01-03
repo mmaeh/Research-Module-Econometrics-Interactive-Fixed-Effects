@@ -1,5 +1,7 @@
 library(foreign)
 library(ggplot2)
+library(gplots)
+library(lattice)
 library(lfe)
 library(lmtest)
 library(multiwayvcov)
@@ -7,6 +9,7 @@ library(phtt)
 library(plm)
 library(plotly)
 library(psych)
+library(rgl)
 library(stargazer)
 library(xlsx)
 library(zeallot)
@@ -22,7 +25,7 @@ data[, 'h_lag'] <-
   }))
 
 sic_codes <- read.xlsx('./real_world_data_application/sic_names.xlsx', sheetIndex = 1)
-
+sic_overreaching_sectors <- read.xlsx('./real_world_data_application/sic_overreaching_sectors.xlsx', sheetIndex = 1)
 
 # variable list of all variables used in table 3
 varlist <-
@@ -53,6 +56,9 @@ varlist <-
 # weight argument!).
 data_weighted <- data[, 3:454] * sqrt(data$weight_emp)
 data_weighted <- cbind(data[, c('Sector', 'year')], data_weighted)
+
+balanced_sectors <- unique(data_weighted[which(is.na(data_weighted['Outs_na'])),"Sector"])
+data_weighted_bal <- data_weighted[which(!data_weighted[,'Sector'] %in% balanced_sectors),]
 
 # time dummy creation. While we just could specify twoways fixed effects within plm
 # the estimates from voiglaender also rely on dummy variables in the case of time
@@ -229,7 +235,9 @@ checkSpecif(test_model, level = 0.01)
 
 # column 3
 weighted_interactive3 <- Eup(
-  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg']
+  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'],
+  additive.effects = 'twoways',
+  dim.criterion = 'IPC1'
 )
 
 summary(weighted_interactive3)
@@ -237,29 +245,15 @@ summary(weighted_interactive3)
 # column 4
 weighted_interactive4 <- Eup(
   vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
-  additive.effects = 'individual',
+  additive.effects = 'twoways',
   dim.criterion = 'IPC1'
 )
 
-residuals <- weighted_interactive4$residuals
-factors <- weighted_interactive4$unob.factors
-loadings <- weighted_interactive4$ind.loadings
-
-sectors <- as.data.frame(unique(data['Sector']))
-structure <- as.data.frame(t(weighted_interactive4$unob.fact.stru)[,1])
-struc_by_sectors <- cbind(sectors, structure)
-colnames(struc_by_sectors) <- c('sector', 'structure for t == 1')
-struc_by_sectors <- merge(struc_by_sectors, sic_codes, by = 'sector', all.x = TRUE)
-
-write.xlsx(struc_by_sectors, './output/struc_by_sectors.xlsx')
-
 plot(summary(weighted_interactive4))
 
-opt_obj <- OptDim(weighted_interactive4)
+opt_obj <- OptDim(weighted_interactive4, criteria = c("PC3", "ER", "GR", "IPC1", "IPC2", "IPC3"))
 
 plot(opt_obj)
-
-parameter_variance(vars_weighted[,,c('s_h_avg', 'equip_pw', 'OCAMovK', 'HT_diff')], factors, loadings, residuals)
 
 
 # column 5
@@ -271,11 +265,16 @@ summary(weighted_interactive5)
 
 # column 6
 weighted_interactive6 <- Eup(
-  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's2d_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'] + vars_weighted[,,'RD_int_lag'] + vars_weighted[,,'Outs_na'] + vars_weighted[,,'Outs_diff']
+  vars_weighted[, , 'h'] ~ -1 + vars_weighted[, , 's2d_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'] + vars_weighted[,,'RD_int_lag'],
+  additive.effects = 'twoways',
+  dim.criterion = 'IPC1'  
 )
 
 summary(weighted_interactive6)
+plot(summary(weighted_interactive6))
 
+opt_obj <- OptDim(weighted_interactive6)
+plot(opt_obj)
 
 ########################################
 # comparison table original / interactive
@@ -378,19 +377,40 @@ weighted_interactive4 <- Eup(
 )
 
 
+data_weighted <- data_weighted[order(data_weighted$Sector, data_weighted$year), ]
+
 data_weighted[,'resid'] <- sapply(seq(1:17184), function(x) weighted_4$residuals[[x]]) 
 data_weighted[,'resid_stan'] <- sapply(data_weighted['resid'], function(x) (x - mean(data_weighted[,'resid'])) / sd(data_weighted[,'resid']))
+data_weighted[,'resid_stan'] <- abs(data_weighted[,'resid_stan'])
 data_weighted[,'fitted'] <- sapply(seq(1:17184), function(x) (weighted_4$model[[1]][[x]] - weighted_4$residuals[[x]]))
-ggplot(data_weighted, aes(x=fitted,y=resid_stan, colour = factor(Sector))) +
-  geom_point()+geom_hline(yintercept=0)+geom_smooth()
+ggplot(data_weighted, aes(x=fitted,y=resid_stan)) +
+  geom_point(aes(color=name.x, shape = name.x))+geom_hline(yintercept=0)+geom_smooth() +
+  scale_colour_manual(values = col_vector, labels = name_vector) + 
+  scale_shape_manual(values = shape_vector, labels = name_vector)
+ggplot(data_weighted, aes(x=sector, y=year)) +
+  geom_tile(aes(fill=resid_stan)) +theme_bw() + coord_equal() +
+  scale_fill_gradientn(colours = c("yellow", "green", "blue", "green", "yellow"),
+                       values = rescale(c(-6,-3,0,3,6)), guide = "colorbar",limits=c(-6,6))
+bwr.colors <- colorRampPalette(c("yellow", "green", "blue", "green", "yellow"))
+
 
 
 data_weighted[,'resid_inter'] <- as.vector(weighted_interactive4$residuals)
 data_weighted[,'resid_inter_stan'] <- sapply(data_weighted['resid_inter'], function(x) (x - mean(data_weighted[,'resid_inter'])) / sd(data_weighted[,'resid_inter']))
+data_weighted[,'resid_inter_stan'] <- abs(data_weighted[,'resid_inter_stan'])
 data_weighted[,'fitted_inter'] <- as.vector(weighted_interactive4$fitted.values)
-ggplot(data_weighted, aes(x=fitted_inter,y=resid_inter_stan, color = factor(Sector))) +
-  geom_point()+geom_hline(yintercept=0)+geom_smooth()
+data_weighted[,'sector'] <- rep(1:358, each = 48)
+ggplot(data_weighted, aes(x=fitted_inter,y=resid_inter_stan)) +
+  geom_point(aes(color=name.x, shape = name.x))+geom_hline(yintercept=0)+geom_smooth() +
+  scale_colour_manual(values = col_vector, labels = name_vector) + 
+  scale_shape_manual(values = shape_vector, labels = name_vector)
+ggplot(data_weighted, aes(x=sector, y=year)) +
+  geom_tile(aes(fill=resid_inter_stan)) +theme_bw() + coord_equal() +
+  scale_fill_gradientn(colours = c("yellow", "green", "blue", "green", "yellow"),
+                       values = rescale(c(-6,-3,0,3,6)), guide = "colorbar",limits=c(-6,6))
 
+
+resid1_inter(weighted_interactive4, "w4_inter_resid1")
 
 resid <- as.vector(weighted_interactive4$residuals)
 resid <- sapply(resid, function(x) (x - mean(resid)) / sd(resid))
@@ -431,3 +451,46 @@ for (i in 1:6) {
   
   results_2[, ((i-1)*2 + 1):(i*2)] <- eup_model$coefficients[, 1:2]
 }    
+
+
+residuals <- weighted_interactive4$residuals
+factors <- weighted_interactive4$unob.factors
+loadings <- weighted_interactive4$ind.loadings
+
+sectors <- as.data.frame(unique(data['Sector']))
+structure <- as.data.frame(t(weighted_interactive4$unob.fact.stru)[,1])
+struc_by_sectors <- cbind(sectors, structure)
+colnames(struc_by_sectors) <- c('sector', 'structure for t == 1')
+struc_by_sectors <- merge(struc_by_sectors, sic_codes, by = 'sector', all.x = TRUE)
+
+write.xlsx(struc_by_sectors, './output/struc_by_sectors.xlsx')
+
+
+residuals <- as.vector(weighted_interactive4$residuals)
+residuals_stan <- sapply(residuals, function(x) (x - mean(residuals)) / sd(residuals))
+residuals_stan <- matrix(residuals_stan, nrow = 48, ncol = 358)
+
+
+heatmap(residuals_stan, Rowv=NA, Colv=NA, col = heat.colors(256), scale="column", margins=c(5,10))
+ggplot(hm, aes(x=x, y=y, fill=value))
+
+
+data_weighted['two_digit_code'] <- sapply(data_weighted['Sector'], function(x) substr(x, start = 1, stop = 2))
+data_weighted['fac_str'] <- as.vector(weighted_interactive4$unob.fact.stru)
+data_weighted <- merge(data_weighted, sic_overreaching_sectors, by.x = "two_digit_code", by.y = "code")
+data_weighted['code_1'] <- as.factor(data_weighted[,'code_1'])
+col_vector <- c('blue', 'red', 'purple', 'blue', 'red', 'purple', 'blue', 'red', 'purple', 'blue', 'red', 'purple', 'black')
+line_vector <- c('solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'dashed', 'dashed', 'dashed', 'dashed', 'dashed', 'dashed', 'dashed')
+shape_vector <- c(15,15,15,16,16,16,15,15,15,16,16,16,15)
+name_vector <- as.character(unique(data_weighted$name_1))
+ggplot(data = data_weighted, aes(x = year, y = fac_str, group = Sector, linetype = code_1, color = code_1, shape = code_1)) + 
+  geom_line() +
+  geom_point(size = 3) + 
+  scale_colour_manual(values = col_vector, labels = name_vector) + 
+  scale_linetype_manual(values = line_vector, labels = name_vector) + 
+  scale_shape_manual(values = shape_vector, labels = name_vector) +
+  ylab("Factor Structure") + 
+  xlab("Year") + 
+  labs(color = "Sector", shape = "Sector", linetype = "Sector") + 
+  theme_minimal()
+ggsave("factor_str.png", dpi = 600, width = 15, height = 10)

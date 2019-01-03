@@ -89,3 +89,6 @@ for (c in combinations) {
 
 saveRDS(results, './output/table_Vc.rds')
 write.xlsx(results, './output/table_Vc.xlsx')
+
+table1 <- xtable(results, digits = 3, auto = TRUE)
+print.xtable(table1)

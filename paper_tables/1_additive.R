@@ -25,13 +25,13 @@ combinations <- list(
 
 #constants used
 param <- c(1, 3)
-r <- 2
+R <- 2
 n_rep <- 1000
 
 #container to store results
 temp_results <- data.frame(matrix(nrow = n_rep, ncol = 16))
 results <- data.frame(matrix(nrow = length(combinations), ncol = 18))
-colnames(results) <- c('i', 't', 'coef1_ols', 'sd1_ols', 'coef2_ols', 'sd2_ols', 
+colnames(results) <- c('N', 'T', 'coef1_ols', 'sd1_ols', 'coef2_ols', 'sd2_ols', 
                       'coef1_within', 'sd1_within', 'coef2_within', 'sd2_within',
                       'coef1_infeasible', 'sd1_infeasible', 'coef2_infeasible', 'sd2_infeasible',
                       'coef1_interactive', 'sd1_interactive', 'coef2_interactive', 'sd2_interactive')
@@ -47,14 +47,14 @@ iter <- 0
 
 for (c in combinations) {
   
-  c(i, t) %<-% combinations[[iter + 1]]
-  results[iter + 1, 1:2] %<-% c(i, t)
+  c(N, T) %<-% combinations[[iter + 1]]
+  results[iter + 1, 1:2] %<-% c(N, T)
   
   for (rep in 1:n_rep) {
     
     #create simulated data
     
-    epsilon <- error_function(t, i, mean = 0, sd = 2)
+    epsilon <- error_function(T, N, mean = 0, sd = 2)
     source('./data_generating/data_generating_additive.R')
     
     #estimate naive-estimator
@@ -71,7 +71,7 @@ for (c in combinations) {
     
     #estimate interactive-estimator
     
-    temp_results[rep, c(13, 15)] <- interactive_est_2(X, Y, r, beta_start = 'factor', 0.0001)  
+    temp_results[rep, c(13, 15)] <- interactive_est_2(X, Y, R, beta_start = 'factor', 0.0001)  
     
     setTxtProgressBar(progress, iter * n_rep + rep) 
   }

@@ -1,14 +1,13 @@
-load <- matrix(1, nrow = i, ncol = r)
-load[, 1] <- rnorm(i) 
-fac <- matrix(1, nrow = t, ncol = r)
-fac[, 2] <- rnorm(t) 
+load <- matrix(1, nrow = N, ncol = R)
+load[, 1] <- rnorm(N) 
+fac <- matrix(1, nrow = T, ncol = R)
+fac[, 2] <- rnorm(T) 
 
 epsilon <- epsilon
 
-X <- array(data = NA, dim = c(t, i, length(param)))
+X <- array(data = NA, dim = c(T, N, length(param)))
 
-X[,,1] <- 1 + fac %*% t(load) + matrix(1, nrow = t, ncol = r) %*% t(load) + fac %*% matrix(1, nrow = r, ncol = i) + matrix(rnorm(t * i), nrow = t, ncol = i)
-X[,,2] <- 1 + fac %*% t(load) + matrix(1, nrow = t, ncol = r) %*% t(load) + fac %*% matrix(1, nrow = r, ncol = i) + matrix(rnorm(t * i), nrow = t, ncol = i)
+X[,,1] <- 1 + fac %*% t(load) + matrix(1, nrow = T, ncol = R) %*% t(load) + fac %*% matrix(1, nrow = R, ncol = N) + matrix(rnorm(T * N), nrow = T, ncol = N)
+X[,,2] <- 1 + fac %*% t(load) + matrix(1, nrow = T, ncol = R) %*% t(load) + fac %*% matrix(1, nrow = R, ncol = N) + matrix(rnorm(T * N), nrow = T, ncol = N)
 
 Y <- X[,,1] * param[1] + X[,,2] * param[2] + fac %*% t(load) + epsilon
-

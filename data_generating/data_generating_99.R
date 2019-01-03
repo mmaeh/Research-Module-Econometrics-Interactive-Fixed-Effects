@@ -1,5 +1,7 @@
 load <- matrix(rnorm(N * R), nrow = N, ncol = R)
-fac <- matrix(rnorm(T * R), nrow = T, ncol = R)
+fac <- matrix(rnorm(T * (R-1)), nrow = T, ncol = (R-1))
+fac1 <- seq(from = 1, to = 1.2, length.out = T) + rnorm(T,0,0.02)
+fac <- cbind(fac, fac1)
 
 epsilon <- epsilon
 

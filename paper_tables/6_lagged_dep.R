@@ -83,7 +83,7 @@ for (c in combinations) {
     temp_results[, k] <- sqrt(mean((temp_results[, k - 1] - mean(temp_results[, k - 1]))^2))  
   }
   
-  results[iter + 1, 3:14] <- colMeans(temp_results, na.rm = TRUE)  
+  results[iter + 1, 3:26] <- colMeans(temp_results, na.rm = TRUE)  
   
   iter <- iter + 1 
 
@@ -91,3 +91,6 @@ for (c in combinations) {
 
 saveRDS(results, './output/table_VI.rds')
 write.xlsx(results, './output/table_VI.xlsx')
+
+table <- xtable(results[,c(1:2, 15:26)], digits = 3, auto = TRUE)
+print.xtable(table)

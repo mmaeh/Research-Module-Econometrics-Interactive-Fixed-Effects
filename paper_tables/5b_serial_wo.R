@@ -2,6 +2,7 @@
 library('phtt')
 library('psych')
 library('xlsx')
+library('xtable')
 library('zeallot')
 
 #functions used in the following
@@ -89,3 +90,6 @@ for (c in combinations) {
 
 saveRDS(results, './output/table_Vb.rds')
 write.xlsx(results, './output/table_Vb.xlsx')
+
+table1 <- xtable(results, digits = 3, auto = TRUE)
+print.xtable(table1)

@@ -92,10 +92,10 @@ for (c in combinations) {
     temp_results[rep, c(45, 47)] <- interactive_est_2(X, Y, r, beta_start = 'factor', 0.0001)   
     
     # alpha == 16
-    Y <- X[,,1] * param[1] + X[,,2] * param[2] + 16 * fac %*% t(load) + epsilon
-    temp_results[rep, c(49, 51)] <- within_est(X, Y, individual = FALSE, time = FALSE)
-    temp_results[rep, c(53, 55)] <- within_est(X, Y, individual = TRUE, time = TRUE)
-    temp_results[rep, c(57, 59)] <- interactive_est_2(X, Y, r, beta_start = 'factor', 0.0001)  
+    #Y <- X[,,1] * param[1] + X[,,2] * param[2] + 16 * fac %*% t(load) + epsilon
+    #temp_results[rep, c(49, 51)] <- within_est(X, Y, individual = FALSE, time = FALSE)
+    #temp_results[rep, c(53, 55)] <- within_est(X, Y, individual = TRUE, time = TRUE)
+    #temp_results[rep, c(57, 59)] <- interactive_est_2(X, Y, r, beta_start = 'factor', 0.0001)  
     
     setTxtProgressBar(progress, iter * n_rep + rep)
     
@@ -113,3 +113,6 @@ for (c in combinations) {
 
 saveRDS(results, './output/table_III.rds')
 write.csv(results, './output/table_III.csv')
+
+table1 <- xtable(results[, c(1:2, 39:50)], digits = 3, auto = TRUE)
+print.xtable(table1)
