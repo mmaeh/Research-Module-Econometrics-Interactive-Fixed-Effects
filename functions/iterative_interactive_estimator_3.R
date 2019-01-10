@@ -1,9 +1,10 @@
-interactive_est_3 <-
-  function(X, Y, R, tolerate) {
-    # dimensions of X
+interactive_est_3 <- function(X, Y, R, tolerate) {
+    # Dimension of X.
     c(T, N, p) %<-% dim(X)
     
-    # optimize containers
+    # Initialize containers to store estimates resulting
+    # from different starting values, OLS estimate and 
+    # PCA estimate of F.
     beta_start <- matrix(0, nrow = 2, ncol = p)
     beta_start[2, ] <- within_est(X, Y, individual = FALSE, time = FALSE)
     
@@ -20,37 +21,54 @@ interactive_est_3 <-
       n <- 0
   
       
-      # while loop to get interactive estimator 
+      # Run loop still convergence criterium is reached. 
       while (n < 500 && betanorm > tolerate) {
         
-        # get factor and loading estimates
+        # Initialize W = Y and adjust in the following
+        # according to starting value.
         W <- Y
+        
+        # For F as starting value we simply get W = Y, 
+        # since beta_start[1,] = 0.
         for (h in 1:p) {
           W <- W - X[, , h] * beta[h]
         }
+        
+        # Get factor and loading estimates from 
+        # factor_est() function.
         c(fac_hat, load_hat, VNT) %<-% factor_est(W, R)
         
-        # update beta and compare to previous estimate
+        # Update beta and compare to previous estimate to
+        # check wheter convergence is reached.
         beta <- beta_update(X, xxinv, Y, fac_hat, load_hat)
         betanorm <- norm(beta - betaold)
+        
+        # Set beta to betaold, for next comparison in next
+        # iteration step.
         betaold <- beta
         
-        # set counter + 1
+        # Set counter plus one.
         n <- n + 1
         
       }
       
+      # Compute errors for each starting value.
       err <- Y - fac_hat %*% t(load_hat)
       for (n in 1:length(beta)) {
         err <- err - X[,,n] * beta[n]
       }
       
+      # Compute sigma corresponding to starting
+      # value.
       sigma_opt[s] <- tr(err %*% t(err)) 
       
+      # Save beta estimate.
       beta_opt[s,] <- beta
       
     }
-      
+    
+    # Return beta corresponding to lower
+    # cirterium value.
     return(beta_opt[which.min(sigma_opt),])
     
   }

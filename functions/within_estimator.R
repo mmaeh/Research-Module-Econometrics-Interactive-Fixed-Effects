@@ -1,51 +1,53 @@
-within_est <- function(X,
-                       Y,
-                       individual = FALSE,
-                       time = FALSE) {
-  c(t, i, p) %<-% dim(X)
+within_est <- function(X, Y, individual = FALSE, time = FALSE) {
+  # Dimension of X.
+  c(T, N, p) %<-% dim(X)
   
-  xx <- matrix(0, nrow = p, ncol = p)
-  xy <- matrix(0, nrow = p, ncol = 1)
-  X_dem <- array(data = NA, dim = c(t, i, p))
+  # Initialize containers for XX, XY needed for OLS estimator.
+  XX <- matrix(0, nrow = p, ncol = p)
+  XY <- matrix(0, nrow = p, ncol = 1)
+  # X_dem <- array(data = NA, dim = c(T, N, p))
   
-  M_i <- diag(1, i)
-  M_t <- diag(1, t)
+  # Initialize transformation matrices, default is identity matrix,
+  # which reduces to the normal OLS estimator. 
+  M_N <- diag(1, N)
+  M_T <- diag(1, T)
   
   if (individual == TRUE) {
-    M_i <-
-      diag(1, i) - ones(i) %*% solve(t(ones(i)) %*% ones(i)) %*% t(ones(i))
+    # Compute cross-section transformation matrix. 
+    M_N <-
+      diag(1, N) - ones(N) %*% solve(t(ones(N)) %*% ones(N)) %*% t(ones(N))
   }
   
   if (time == TRUE) {
-    M_t <-
-      diag(1, t) - ones(t) %*% solve(t(ones(t)) %*% ones(t)) %*% t(ones(t))
+    # Compute time-section transformation matrix. 
+    M_T <-
+      diag(1, T) - ones(T) %*% solve(t(ones(T)) %*% ones(T)) %*% t(ones(T))
   }
   
   for (j in 1:p) {
     for (k in j:p) {
-      x_j_fe <- M_t %*% X[, , j] %*% M_i
-      x_k_fe <- M_t %*% X[, , k] %*% M_i
-      X_dem[,,j] <- x_j_fe
-      xx[j, k] <- tr(t(x_j_fe) %*% x_k_fe)
-      xx[k, j] <- xx[j, k]
+      # Compute within-transformation for every regressor.
+      X_j_transf <- M_T %*% X[, , j] %*% M_N
+      # Also, Compute within-transformation for all 
+      # regressors k != j.
+      X_k_transf <- M_T %*% X[, , k] %*% M_N
+
+      # Save trace of inner product of transformed regressors.
+      XX[j, k] <- tr(t(X_j_transf) %*% X_k_transf)
+      # The lower triangle of the matrix is symmetric to the
+      # upper triangle.
+      XX[k, j] <- XX[j, k]
       
-      xy[j] <- tr(t(x_j_fe) %*% Y)
+      # Also, take the trace of the inner product between 
+      # each regressor and Y.
+      XY[j] <- tr(t(X_j_transf) %*% Y)
     }
   }
   
-  beta <- solve(xx) %*% xy
+  # Compute OLS estimator from transformed data.
+  beta <- solve(XX) %*% XY
   
-  "err <- M_t %*% Y %*% M_i
-  for (j in 1:p) {
-    err <- err - X_dem[,,j] * beta[j]
-  }
-  
-  #sigma <- tr(err %*% t(err)) / (i * t - t - i - p) 
-  sigma <- tr(err %*% t(err)) / (i * t - p)
-  
-  var_beta <- sigma * solve(xx)
-  sd_beta <- sqrt(diag(var_beta))"
-  
+  # Return estimate.
   return(beta)
   
 }
