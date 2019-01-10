@@ -1,18 +1,21 @@
+# Set burn_in to 100.
 burn_in <- 100
 
-load <- matrix(rnorm(i * r), nrow = i, ncol = r)
-fac <- matrix(rnorm((t + burn_in) * r), nrow = t + burn_in, ncol = r)
+# Simulate factors and loadings from standard normal distribution.
+# Include additional burn-in for factor simulation.
+load <- matrix(rnorm(N * R), nrow = N, ncol = R)
+fac <- matrix(rnorm((T + burn_in) * R), nrow = T + burn_in, ncol = R)
 
-epsilon <- epsilon
+# Set up container to store regressors.
+X <- array(data = NA, dim = c(T + burn_in, N, length(param)))
+Y <- matrix(0, nrow = T + burn_in, ncol = N)
 
-X <- array(data = NA, dim = c(t + burn_in, i, length(param)))
-Y <- matrix(0, nrow = t + burn_in, ncol = i)
-
-X[,,1] <- 1 + fac %*% t(load) + matrix(1, nrow = t + burn_in, ncol = r) %*% t(load) + fac %*% matrix(1, nrow = r, ncol = i) + matrix(rnorm(t * i), nrow = t + burn_in, ncol = i)
-X[,,2] <- 1 + fac %*% t(load) + matrix(1, nrow = t + burn_in, ncol = r) %*% t(load) + fac %*% matrix(1, nrow = r, ncol = i) + matrix(rnorm(t * i), nrow = t + burn_in, ncol = i)
+# Compute regressors according to model specification in simulation part.
+X[,,1] <- 1 + fac %*% t(load) + matrix(1, nrow = T + burn_in, ncol = R) %*% t(load) + fac %*% matrix(1, nrow = R, ncol = N) + matrix(rnorm(T * N), nrow = T + burn_in, ncol = N)
+X[,,2] <- 1 + fac %*% t(load) + matrix(1, nrow = T + burn_in, ncol = R) %*% t(load) + fac %*% matrix(1, nrow = R, ncol = N) + matrix(rnorm(T * N), nrow = T + burn_in, ncol = N)
 
 
-for (j in 1:(t+burn_in)) {
+for (j in 1:(T + burn_in)) {
   if (j == 1) {
     Y[j,] <- X[j,,1] * param[1] + X[j,,2] * param[2] + (fac %*% t(load))[j,] + epsilon[j,]
   } else {
@@ -20,20 +23,7 @@ for (j in 1:(t+burn_in)) {
   }
 }
 
-X[burn_in:(burn_in + t),,3] <- Y[(burn_in - 1):(t + burn_in - 1),]
-X <- X[(burn_in + 1):(t + burn_in),,]
-Y <- Y[(burn_in + 1):(t + burn_in),]
-fac <- fac[(burn_in + 1):(t + burn_in),]
-
-"plm_df <- data.frame(matrix(nrow = i*(t-1), ncol = 6))
-colnames(plm_df) <- c('i', 't', 'Y', 'X1', 'X2', 'X3')
-
-plm_df$i <- rep(1:i, each = (t-1))
-plm_df$t <- rep(1:(t-1), times = i)
-
-for (j in 1:i) {
-  plm_df[((j-1)*t-(j-2)):(j*(t-1)), 'Y'] <- Y[,j]
-  plm_df[((j-1)*t-(j-2)):(j*(t-1)), 'X1'] <- X[,j,1]
-  plm_df[((j-1)*t-(j-2)):(j*(t-1)), 'X2'] <- X[,j,2]
-  plm_df[((j-1)*t-(j-2)):(j*(t-1)), 'X3'] <- X[,j,3]
-  }"
+X[burn_in:(burn_in + T),,3] <- Y[(burn_in - 1):(T + burn_in - 1),]
+X <- X[(burn_in + 1):(T + burn_in),,]
+Y <- Y[(burn_in + 1):(T + burn_in),]
+fac <- fac[(burn_in + 1):(T + burn_in),]

@@ -1,16 +1,16 @@
 factor_est <- function(W, R) {
-  c(t, i) %<-% dim(W)
+  c(T, N) %<-% dim(W)
   
-  if (t < i) {
-    WW <- W %*% t(W) / (t * i)
+  if (T < N) {
+    WW <- W %*% t(W) / (T * N)
     ev <- eigen(WW)
-    fac_hat <- ev$vectors[, 1:R] * sqrt(t)
-    load_hat <- t(W) %*% fac_hat / t
+    fac_hat <- ev$vectors[, 1:R] * sqrt(T)
+    load_hat <- t(W) %*% fac_hat / T
   }  else {
-    WW <- t(W) %*% W / (t * i)
+    WW <- t(W) %*% W / (T * N)
     ev <- eigen(WW)
-    load_hat <- ev$vectors[, 1:R] * sqrt(i)
-    fac_hat <- W %*% load_hat / i
+    load_hat <- ev$vectors[, 1:R] * sqrt(N)
+    fac_hat <- W %*% load_hat / N
   }
   
   eigenvalues <- diag(ev$values[1:R])

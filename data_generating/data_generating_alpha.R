@@ -1,9 +1,10 @@
-load <- matrix(rnorm(i * r), nrow = i, ncol = r)
-fac <- matrix(rnorm(t * r), nrow = t, ncol = r)
+# Simulate factors and loadings from standard normal distribution.
+load <- matrix(rnorm(N * R), nrow = N, ncol = R)
+fac <- matrix(rnorm(T * R), nrow = T, ncol = R)
 
-epsilon <- epsilon
+# Set up container to store regressors.
+X <- array(data = NA, dim = c(T, N, length(param)))
 
-X <- array(data = NA, dim = c(t, i, length(param)))
-
-X[,,1] <- 1 + fac %*% t(load) + matrix(1, nrow = t, ncol = r) %*% t(load) + fac %*% matrix(1, nrow = r, ncol = i) + matrix(rnorm(t * i), nrow = t, ncol = i)
-X[,,2] <- 1 + fac %*% t(load) + matrix(1, nrow = t, ncol = r) %*% t(load) + fac %*% matrix(1, nrow = r, ncol = i) + matrix(rnorm(t * i), nrow = t, ncol = i)
+# Compute regressors according to model specification in simulation part.
+X[,,1] <- 1 + fac %*% t(load) + matrix(1, nrow = T, ncol = R) %*% t(load) + fac %*% matrix(1, nrow = R, ncol = N) + matrix(rnorm(T * N), nrow = T, ncol = N)
+X[,,2] <- 1 + fac %*% t(load) + matrix(1, nrow = T, ncol = R) %*% t(load) + fac %*% matrix(1, nrow = R, ncol = N) + matrix(rnorm(T * N), nrow = T, ncol = N)

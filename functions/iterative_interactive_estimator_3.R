@@ -1,7 +1,7 @@
 interactive_est_3 <-
-  function(X, Y, r, tolerate) {
+  function(X, Y, R, tolerate) {
     # dimensions of X
-    c(t, i, p) %<-% dim(X)
+    c(T, N, p) %<-% dim(X)
     
     # optimize containers
     beta_start <- matrix(0, nrow = 2, ncol = p)
@@ -28,7 +28,7 @@ interactive_est_3 <-
         for (h in 1:p) {
           W <- W - X[, , h] * beta[h]
         }
-        c(fac_hat, load_hat, VNT) %<-% factor_est(W, r)
+        c(fac_hat, load_hat, VNT) %<-% factor_est(W, R)
         
         # update beta and compare to previous estimate
         beta <- beta_update(X, xxinv, Y, fac_hat, load_hat)

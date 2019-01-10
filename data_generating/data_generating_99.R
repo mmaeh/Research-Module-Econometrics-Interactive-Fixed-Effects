@@ -1,7 +1,15 @@
+burn_in = 100
+
 load <- matrix(rnorm(N * R), nrow = N, ncol = R)
-fac <- matrix(rnorm(T * (R-1)), nrow = T, ncol = (R-1))
-fac1 <- seq(from = 1, to = 1.2, length.out = T) + rnorm(T,0,0.02)
-fac <- cbind(fac, fac1)
+fac1 <- matrix(rnorm(T * (R-1)), nrow = T, ncol = (R-1))
+
+fac2 <- matrix(NA, nrow = T + burn_in, ncol = 1)
+fac2[1,1] <- rnorm(1)
+for (i in 2:(T + burn_in)) {
+  fac2[i, 1] <- fac2[i-1, 1] + rnorm(1) 
+}
+
+fac <- cbind(fac1, fac2[(burn_in + 1):(burn_in + T), 1])
 
 epsilon <- epsilon
 

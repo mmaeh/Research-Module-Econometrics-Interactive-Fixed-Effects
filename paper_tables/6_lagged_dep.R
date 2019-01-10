@@ -1,14 +1,15 @@
-#load packages
-library('phtt')
-library('psych')
-library('xlsx')
-library('zeallot')
+# Load necessary packages.
+library(phtt)
+library(psych)
+library(xlsx)
+library(xtable)
+library(zeallot)
 
-#functions used in the following
+# Load necessary functions used in the simulation.
 function.sources <- paste('./functions/', list.files('./functions/', pattern="*.R"), sep = '')
 sapply(function.sources, source, .GlobalEnv)
 
-#combinations of i and t to use in simulation
+# Combinations of N and T used in the simulation.
 combinations <- list(
   c(100, 5),
   c(100, 10),
@@ -23,12 +24,12 @@ combinations <- list(
   c(50, 100)
 )
 
-#constants used
-param <- c(1, 3, 0.75)
-r <- 2
+# Used constants.
+param <- c(2, 4, 0.75)
+R <- 2
 n_rep <- 1000
 
-#container to store results
+# Container to store results.
 temp_results <- data.frame(matrix(nrow = n_rep, ncol = 24))
 results <- data.frame(matrix(nrow = length(combinations), ncol = 26))
 colnames(results) <- c('i', 't', 'coef1_ols', 'sd1_ols', 'coef2_ols', 'sd2_ols', 'coef3_ols', 'sd3_ols', 
@@ -38,10 +39,10 @@ colnames(results) <- c('i', 't', 'coef1_ols', 'sd1_ols', 'coef2_ols', 'sd2_ols',
 
 
 #--------------------------------------------
-#start simulation process--------------------
+# Start simulation process-------------------
 #--------------------------------------------
 
-
+# Set up progress bar.
 progress <- txtProgressBar(min = 0, max = length(combinations) * n_rep, style = 3)
 iter <- 0
 

@@ -9,7 +9,7 @@ infeasible_est <- function(X, Y, given = NULL) {
     }
   }
   
-  c(t, i, p) %<-% dim(X)
+  c(T, N, p) %<-% dim(X)
   xx <- matrix(0, nrow = p, ncol = p)
   xy <- matrix(0, nrow = p, ncol = 1)
   

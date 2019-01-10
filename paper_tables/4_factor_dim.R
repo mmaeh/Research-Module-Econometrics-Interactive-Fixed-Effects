@@ -1,14 +1,15 @@
-#load packages
-library('phtt')
-library('psych')
-library('xlsx')
-library('zeallot')
+# Load necessary packages.
+library(phtt)
+library(psych)
+library(xlsx)
+library(xtable)
+library(zeallot)
 
-#functions used in the following
+# Load necessary functions used in the simulation.
 function.sources <- paste('./functions/', list.files('./functions/', pattern="*.R"), sep = '')
 sapply(function.sources, source, .GlobalEnv)
 
-#combinations of i and t to use in simulation
+# Combinations of N and T used in the simulation.
 combinations <- list(
   c(100, 5),
   c(100, 10),
@@ -21,12 +22,12 @@ combinations <- list(
   c(50, 100)
 )
 
-#constants used
-param <- c(1, 3)
-r <- 2
+# Used constants.
+param <- c(2, 4)
+R <- 2
 n_rep <- 1000
 
-#container to store results
+# Container to store results.
 temp_results <- data.frame(matrix(nrow = n_rep, ncol = 24))
 results <- data.frame(matrix(nrow = length(combinations), ncol = 26))
 colnames(results) <- c('i', 't', 
@@ -40,48 +41,57 @@ colnames(results) <- c('i', 't',
 
 
 #--------------------------------------------
-#start simulation process--------------------
+# start simulation process-------------------
 #--------------------------------------------
 
-
+# Set up progress bar.
 progress <- txtProgressBar(min = 0, max = length(combinations) * n_rep, style = 3)
 iter <- 0
 
+# Start iteration process.
 for (c in combinations) {
   
+  # N and T to use.
   c(i, t) %<-% combinations[[iter + 1]]
   results[iter + 1, 1:2] %<-% c(i, t)
   
   for (rep in 1:n_rep) {
     
-    #create simulated data
-    
+    # Create error matrix from normal distribution with variance 4.
     epsilon <- error_function(t, i, mean = 0, sd = 2)
+    
+    # Create simulated data, regressors and dependent variable.
     source('./data_generating/data_generating_table_III_IV.R')
     
-    #estimate interactive-estimator from R = 0 to R = 5
-     
-    temp_results[rep, c(1, 3)] <- within_est(X, Y)
-    temp_results[rep, c(5, 7)] <- interactive_est_2(X, Y, 1, beta_start = "OLS", 0.0001)  
-    temp_results[rep, c(9, 11)] <- interactive_est_2(X, Y, 2, beta_start = "OLS", 0.0001)  
-    temp_results[rep, c(13, 15)] <- interactive_est_2(X, Y, 3, beta_start = "OLS", 0.0001)  
-    temp_results[rep, c(17, 19)] <- interactive_est_2(X, Y, 4, beta_start = "OLS", 0.0001)  
-    temp_results[rep, c(21, 23)] <- interactive_est_2(X, Y, 5, beta_start = "OLS", 0.0001)  
+    # Estimate IFE estimator for R = 0 to R = 5.
+    temp_results[rep, c(1, 3)] <- within_est(X, Y) # R = 0 ist just OLS.
+    temp_results[rep, c(5, 7)] <- interactive_est_3(X, Y, R = 1, tolerate = 0.0001)  
+    temp_results[rep, c(9, 11)] <- interactive_est_3(X, Y, R = 2, tolerate = 0.0001)  
+    temp_results[rep, c(13, 15)] <- interactive_est_3(X, Y, R = 3, tolerate = 0.0001)  
+    temp_results[rep, c(17, 19)] <- interactive_est_3(X, Y, R = 4, tolerate = 0.0001)  
+    temp_results[rep, c(21, 23)] <- interactive_est_3(X, Y, R = 5, tolerate = 0.0001)  
     
     setTxtProgressBar(progress, iter * n_rep + rep)
     
   }
   
-  # Get standard deviations.
+  # Compute standard errors corresponding to N, T combination. 
   for (k in seq(2, 24, 2)) {
     temp_results[, k] <- sqrt(mean((temp_results[, k - 1] - mean(temp_results[, k - 1]))^2))  
   }
   
+  # Store estimates and standard errors in results table.
   results[iter + 1, 3:26] <- colMeans(temp_results, na.rm = TRUE)  
   
+  # Set counter plus one.
   iter <- iter + 1 
 
 }
 
+# Save results table.
 saveRDS(results, './output/table_factordim.rds')
 write.csv(results, './output/table_factordim.csv')
+
+# Print output to LaTeX format.
+table <- xtable(results, digits = 3, auto = TRUE)
+print.xtable(table, include.rownames = FALSE)
