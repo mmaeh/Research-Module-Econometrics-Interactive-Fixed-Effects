@@ -1,37 +1,25 @@
 xx_inv <- function(X) {
-  c(t, i, p) %<-% dim(X)
-  xx <- matrix(0, nrow = p, ncol = p)
   
-  for (k in 1:p) {
-    X1 <- X[, , k]
-    for (m in k:p) {
-      X2 <- X[, , m]
-      xx[k, m] <- tr(t(X1) %*% X2)
-      if (k < m) {
-        xx[m, k] <- xx[k, m]
-      }
+  # Get dimensions of X.
+  c(T, N, p) %<-% dim(X)
+  
+  # Container to store XX matrix.
+  XX <- matrix(0, nrow = p, ncol = p)
+  
+  # Compute XX matrix from traces of inner 
+  # products of regressors. 
+  for (j in 1:p) {
+    X_j <- X[, , j]
+    for (k in j:p) {
+      X_k <- X[, , k]
+      XX[j, k] <- tr(t(X_j) %*% X_k)
+      XX[k, j] <- XX[j, k]
     }
   }
-
-  'if (p == 1) {
-    xx[1, 1] <- tr(t(X) %*% X)
-  }
   
-  else {
-    for (k in 1:p) {
-      X1 <- X[, , k]
-      for (m in k:p) {
-        X2 <- X[, , m]
-        xx[k, m] <- tr(t(X1) %*% X2)
-          if (k < m) {
-          xx[m, k] <- xx[k, m]
-          }
-      }
-    }
-  }'
+  # Compute inverse of XX.
+  XXinv = solve(XX)
   
-  xxinv = solve(xx)
-  
-  return(xxinv)
+  return(XXinv)
   
 }

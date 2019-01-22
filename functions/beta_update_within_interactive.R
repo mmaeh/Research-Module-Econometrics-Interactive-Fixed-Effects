@@ -1,13 +1,19 @@
-beta_update <- function(X, xxinv, Y, fac_hat, load_hat) {
-  c(t, i, p) %<-% dim(X)
+beta_update <- function(X, XXinv, Y, fac_hat, load_hat) {
   
-  xy <- matrix(0, nrow = p, ncol = 1)
+  # Dimensions of X.
+  c(T, N, p) %<-% dim(X)
   
-  for (k in 1:p) {
-    xy[k] <- tr(t(X[, , k]) %*% (Y - fac_hat %*% t(load_hat)))
+  # Initialize container to store XY.
+  XY <- matrix(0, nrow = p, ncol = 1)
+  
+  # Compute p entries of XJ matrix according to the second 
+  # term of the IFE estimator on page 1237 of Bai (2009).
+  for (j in 1:p) {
+    XY[j] <- tr(t(X[, , j]) %*% (Y - fac_hat %*% t(load_hat)))
   }
   
-  beta <- xxinv %*% xy
+  # Compute beta from usual OLS formula.
+  beta <- XXinv %*% XY
   
   return(beta)
 }

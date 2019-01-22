@@ -1,55 +1,45 @@
 infeasible_est <- function(X, Y, given = NULL) {
+  
+  # Specify transformation matrix M, depending on whether factors
+  # or loadings you assume as given.
   if (given == 'factors') {
     M <- diag(1, t) - fac %*% solve(t(fac) %*% fac) %*% t(fac)
+  } else if (given == 'loadings') {
+    M <- diag(1, i) - load %*% solve(t(load) %*% load) %*% t(load)
   } else {
-    if (given == 'loadings') {
-      M <- diag(1, i) - load %*% solve(t(load) %*% load) %*% t(load)
-    } else {
-      stop('given has to be either factors or loadings')
-    }
+    stop('Given has to be either factors or loadings')
   }
   
+  # Dimensions of X.
   c(T, N, p) %<-% dim(X)
-  xx <- matrix(0, nrow = p, ncol = p)
-  xy <- matrix(0, nrow = p, ncol = 1)
   
+  # Containers to store XY and XX estimates.
+  XX <- matrix(0, nrow = p, ncol = p)
+  XY <- matrix(0, nrow = p, ncol = 1)
+  
+  # If p == 1, XX and XY are simply weighted by M.
   if (p == 1) {
-    xx[1, 1] <- tr(t(X) %*% M %*% X)
-    xy[1] <- tr(t(X) %*% M %*% Y)
+    XX[1, 1] <- tr(t(X) %*% M %*% X)
+    XY[1] <- tr(t(X) %*% M %*% Y)
   }
   
+  # For p > 1 compute XX and XY entries from traces of 
+  # inner products of MX_j and MX_k, i.e. the transformed X matrices.
   else {
     for (j in 1:p) {
       for (k in j:p) {
-        MX1 <- M %*% X[, , j]
-        MX2 <- M %*% X[, , k]
-        xx[j, k] <- tr(t(MX1) %*% MX2)
-        xx[k, j] <- xx[j, k]
+        MX_j <- M %*% X[, , j] # Transformed X along regressor j.
+        MX_k <- M %*% X[, , k] # Transformed X along regressor k.
+        XX[j, k] <- tr(t(MX_j) %*% MX_k) # XX entry at j, k.
+        XX[k, j] <- xx[j, k] # This is just symmetric to the upper triangle of XX.
         
-        xy[j] <- tr(t(MX1) %*% Y)
+        XY[j] <- tr(t(MX_j) %*% Y) # XY entry at j.
       }
     }
   }
   
-  beta <- solve(xx) %*% xy
-
-  'W_hat <- Y
-  for (j in 1:length(param)) {
-    W_hat <- W_hat - X[,,j] * beta[j]
-  }
-  load_hat <- t(W_hat) %*% fac / t
-    
-  err <- Y - fac %*% t(load_hat)
-  for (j in 1:length(param)) {
-    err <- err - X[,,j] * beta[j]
-  }
-  sigma <- tr(err %*% t(err)) / (i * t + r^2 - p)
-  
-  D_F <- parameter_variance(X, fac, load_hat)
-  D_F_diag <- diag(D_F)
-  
-  variance <- sigma * D_F
-  sd <- sqrt(diag(variance))'
+  # Compute OLS estimator.
+  beta <- solve(XX) %*% XY
   
   return(beta)
   

@@ -25,7 +25,7 @@ combinations <- list(
 )
 
 # Used constants.
-param <- c(2, 4)
+param <- c(1, 3)
 R <- 2
 n_rep <- 1000
 

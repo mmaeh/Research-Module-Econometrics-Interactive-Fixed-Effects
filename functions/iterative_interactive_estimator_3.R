@@ -1,5 +1,5 @@
 interactive_est_3 <- function(X, Y, R, tolerate) {
-    # Dimension of X.
+    # Dimensions of X.
     c(T, N, p) %<-% dim(X)
     
     # Initialize containers to store estimates resulting
@@ -8,16 +8,18 @@ interactive_est_3 <- function(X, Y, R, tolerate) {
     beta_start <- matrix(0, nrow = 2, ncol = p)
     beta_start[2, ] <- within_est(X, Y, individual = FALSE, time = FALSE)
     
-    # things to intialize before while loop
-    xxinv <- xx_inv(X)
+    # Once compute matrix inverse of XX and initialize containers
+    # to store beta and sigma estimates from each starting value.
+    XXinv <- xx_inv(X)
     beta_opt <- matrix(NA, nrow = 2, ncol = p)
     sigma_opt <- matrix(NA, nrow = 2, ncol = 1)
 
+    # Loop through starting values.
     for (s in 1:2) {
 
       beta <- beta_start[s,]
-      betaold <- beta
-      betanorm <- 1
+      betaold <- beta 
+      betanorm <- 1 # To avoid convergence in first iteration.
       n <- 0
   
       
@@ -40,7 +42,7 @@ interactive_est_3 <- function(X, Y, R, tolerate) {
         
         # Update beta and compare to previous estimate to
         # check wheter convergence is reached.
-        beta <- beta_update(X, xxinv, Y, fac_hat, load_hat)
+        beta <- beta_update(X, XXinv, Y, fac_hat, load_hat)
         betanorm <- norm(beta - betaold)
         
         # Set beta to betaold, for next comparison in next
