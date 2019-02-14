@@ -1,3 +1,7 @@
+# This function implements the common OLS and within
+# estimator. The latter is able to account for fixed
+# effects in the individual and time dimension.
+
 within_est <- function(X, Y, individual = FALSE, time = FALSE) {
   # Dimension of X.
   c(T, N, p) %<-% dim(X)

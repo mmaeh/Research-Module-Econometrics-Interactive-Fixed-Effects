@@ -1,6 +1,8 @@
+library(phtt)
 library(xtable)
+library(texreg)
 
-results <- as.data.frame(matrix(NA, 7, 6))
+results <- as.data.frame(matrix(NA, 21, 6))
 
 # column 1
 weighted_interactive1 <- Eup(
@@ -9,6 +11,7 @@ weighted_interactive1 <- Eup(
   factor.dim = 3
 )
 
+wi1 <- summary(weighted_interactive1)
 results[1,1] <- weighted_interactive1$slope.para
 
 
@@ -39,6 +42,7 @@ weighted_interactive4 <- Eup(
   factor.dim = 3
 )
 
+wi4 <- summary(weighted_interactive4)
 results[1:4,4] <- weighted_interactive4$slope.para
 
 
@@ -64,3 +68,9 @@ results[1:7,6] <- weighted_interactive6$slope.para
 
 table <- xtable(results, digits = 3, auto = TRUE)
 print.xtable(table, include.rownames = FALSE)
+
+
+a) do bootstrap and save in table
+b) get coeff with stars
+c) results[1, 1:5] <- sprintf("$%s$", wi4$coefficients[,1])
+d) save as csv

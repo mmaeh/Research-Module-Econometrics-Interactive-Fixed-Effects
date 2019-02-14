@@ -1,11 +1,15 @@
+# This function implements the infeasible IFE estimator
+# which assumes either the factors or the loadings to 
+# be known.
+
 infeasible_est <- function(X, Y, given = NULL) {
   
   # Specify transformation matrix M, depending on whether factors
   # or loadings you assume as given.
   if (given == 'factors') {
-    M <- diag(1, t) - fac %*% solve(t(fac) %*% fac) %*% t(fac)
+    M <- diag(1, T) - fac %*% solve(t(fac) %*% fac) %*% t(fac)
   } else if (given == 'loadings') {
-    M <- diag(1, i) - load %*% solve(t(load) %*% load) %*% t(load)
+    M <- diag(1, N) - load %*% solve(t(load) %*% load) %*% t(load)
   } else {
     stop('Given has to be either factors or loadings')
   }
@@ -31,7 +35,7 @@ infeasible_est <- function(X, Y, given = NULL) {
         MX_j <- M %*% X[, , j] # Transformed X along regressor j.
         MX_k <- M %*% X[, , k] # Transformed X along regressor k.
         XX[j, k] <- tr(t(MX_j) %*% MX_k) # XX entry at j, k.
-        XX[k, j] <- xx[j, k] # This is just symmetric to the upper triangle of XX.
+        XX[k, j] <- XX[j, k] # This is just symmetric to the upper triangle of XX.
         
         XY[j] <- tr(t(MX_j) %*% Y) # XY entry at j.
       }

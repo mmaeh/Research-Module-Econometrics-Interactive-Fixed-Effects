@@ -1,3 +1,7 @@
+# This function computes the factor and factor
+# loadings from the residuals by using PCA
+# analysis. 
+
 factor_est <- function(W, R) {
   
   # Get dimension of W.
@@ -10,18 +14,28 @@ factor_est <- function(W, R) {
     # first estimate the factors, from which the 
     # loadings can be inferred. See page 34 of 
     # supplementary material of Bai (2009).
+    
+    # Compute WW matrix.
     WW <- W %*% t(W) / (T * N)
-    ev <- eigen(WW) # Get eigenvectors and -values.
-    fac_hat <- ev$vectors[, 1:R] * sqrt(T) # Compute factors by sclaing R largest eigenvectors by sqrt(T).
-    load_hat <- t(W) %*% fac_hat / T # Compute laodings from estimated factors. 
+    # Get eigenvectors and -values
+    ev <- eigen(WW) 
+    # Compute factors by sclaing R largest eigenvectors by sqrt(T).
+    fac_hat <- ev$vectors[, 1:R] * sqrt(T) 
+    # Compute laodings from estimated factors. 
+    load_hat <- t(W) %*% fac_hat / T
   }  else {
+    # Compute WW matrix.
     WW <- t(W) %*% W / (T * N) 
-    ev <- eigen(WW) # Get eigenvectors and -values.
-    load_hat <- ev$vectors[, 1:R] * sqrt(N) # Compute loadings by sclaing R largest eigenvectors by sqrt(T).
-    fac_hat <- W %*% load_hat / N # Compute factors from estimated loadings. 
+    # Get eigenvectors and -values.
+    ev <- eigen(WW)
+    # Compute loadings by sclaing R largest eigenvectors by sqrt(T).
+    load_hat <- ev$vectors[, 1:R] * sqrt(N)
+    # Compute factors from estimated loadings. 
+    fac_hat <- W %*% load_hat / N
   }
   
-  # Compute eigenvalues for completeness.
+  # Compute eigenvalues for completeness, although not necessarily
+  # needed for IFE estimator.
   eigenvalues <- diag(ev$values[1:R])
   
   # Return factors, loadings and eigenvalues.

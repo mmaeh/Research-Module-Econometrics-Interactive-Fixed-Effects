@@ -91,9 +91,11 @@ for (k in varlist) {
 
 # Dataframe in matrix form, only including balanced sectors
 balanced_sectors <- unique(data_weighted[which(is.na(data_weighted['Outs_na'])),'sector'])
+data_weighted_bal <- data_weighted[which(!data_weighted$sector %in% balanced_sectors),]
 vars_weighted_bal <- vars_weighted[,-c(balanced_sectors),]
 
 # Save data.
 saveRDS(data_weighted, './real_world_data_application/data_weighted.rds')
+saveRDS(data_weighted_bal, './real_world_data_application/data_weighted_bal.rds')
 saveRDS(vars_weighted, './real_world_data_application/vars_weighted.rds')
 saveRDS(vars_weighted_bal, './real_world_data_application/vars_weighted_bal.rds')
