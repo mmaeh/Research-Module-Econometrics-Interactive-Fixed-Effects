@@ -1,0 +1,46 @@
+library(ggplot2)
+library(xlsx)
+
+# Read in data.
+data_weighted <- readRDS('./data_application/original_data/data_weighted.rds')
+
+
+
+ife_clmn4 <- Eup(
+  vars_weighted[, , 'h'] ~ vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
+  additive.effects = 'none',
+  factor.dim = 3
+)
+
+png(
+  filename = paste("./data_application/figures/output/01_resid_plot_fdim3_bai", name, ".png", sep = ""),
+  type = "cairo",
+  units = "in",
+  width = 10,
+  height = 15,
+  res = 300
+)
+
+data_weighted[, 'resid_inter'] <- as.vector(ife_clmn4$residuals)
+data_weighted[, 'resid_inter_stan'] <-
+  sapply(data_weighted['resid_inter'], function(x)
+    (x - mean(data_weighted[, 'resid_inter'])) / sd(data_weighted[, 'resid_inter']))
+bwr.colors <-
+  colorRampPalette(c("yellow", "green", "blue", "green", "yellow"))
+
+print(wireframe(
+  resid_inter_stan ~ Sector + year,
+  data = data_weighted,
+  drape = TRUE,
+  aspect = c(0.6, 1),
+  col.regions = bwr.colors(150),
+  at = seq(-6, 6, length = 150),
+  scales = list(arrows = FALSE),
+  par.settings = list(axis.line = list(col = "transparent")),
+  colorkey = list(space = "right", height = 0.7),
+  zlab = "Standardized \n Residuals",
+  ylab = "Year"
+))
+
+dev.off()
+
