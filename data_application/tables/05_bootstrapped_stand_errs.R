@@ -1,6 +1,11 @@
-# Fixed effects Bootstrap
+library(plm)
 
-B <- 1000
+# Weighted data from Voigtlaender.
+data_weighted <- readRDS('./data_application/original_data/data_weighted.rds')
+
+# Fixed effects Bootstrap
+#B <- 1000 used in paper!!
+B <- 10
 b_hat_plm <- array(data = NA, dim = c(7, 6, B))
 
 progress <- txtProgressBar(min = 1, max = B, style = 3)
@@ -86,15 +91,17 @@ for (b in 1:B) {
     
 } 
 
+# Compute mean of betas.
 b_hat_plm_mean <- apply(b_hat_plm, c(1,2), mean)
 
+# Intialize container to store SEs results.
 se_b_hat_plm <- matrix(data = 0, nrow = 7, ncol = 6)
 
+# Compute standard errors form variance forumla.
 for (j in 1:B) {
   se_b_hat_plm <- se_b_hat_plm + (b_hat_plm[,,j] - b_hat_plm_mean)^2
 }
-
 se_b_hat_plm <- sqrt(1 / (B - 1) * se_b_hat_plm)
 
-saveRDS(b_hat_plm, "./real_world_data_application/b_hat_plm.rds")
-saveRDS(se_b_hat_plm, "./real_world_data_application/se_b_hat_plm.rds")
+# Save results.
+saveRDS(se_b_hat_plm, "./data_application/tables/output/stand_errs_original_model.rds")

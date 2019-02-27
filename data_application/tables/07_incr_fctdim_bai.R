@@ -7,6 +7,7 @@ vars_weighted <- readRDS('./data_application/original_data/vars_weighted.rds')
 results <- matrix(NA, 8, 9)
 
 for (i in 0:8) {
+  # Column 4 specification.
   regression <- Eup(
     vars_weighted[, , 'h'] ~ vars_weighted[, , 's_h_avg'] + vars_weighted[, , 'equip_pw'] + vars_weighted[, , 'OCAMovK'] + vars_weighted[, , 'HT_diff'],
     d.max = 8,
@@ -18,4 +19,4 @@ for (i in 0:8) {
 }
 
 #Save data.
-saveRDS(results, "./data_application/tables/output/A00_incr_fctdim_bai.rds")
+saveRDS(results, "./data_application/tables/output/07_incr_fctdim_bai.rds")

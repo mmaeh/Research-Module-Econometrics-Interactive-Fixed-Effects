@@ -1,0 +1,1 @@
+Make sure to run all code inside this project after opening the project through the "code_reproduction.Rproj" file in this folder.

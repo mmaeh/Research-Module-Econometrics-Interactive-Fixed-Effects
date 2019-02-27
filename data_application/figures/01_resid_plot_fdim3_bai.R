@@ -5,7 +5,6 @@ library(phtt)
 data_weighted <- readRDS('./data_application/original_data/data_weighted.rds')
 vars_weighted <- readRDS('./data_application/original_data/vars_weighted.rds')
 
-
 ##################BAI ESTIMATOR##################################
 ##Factor dimnesion == 3, no sector fixed-effects#################
 #################################################################
@@ -18,7 +17,7 @@ ife_clmn4 <- Eup(
 
 # Set .up png save.
 png(
-  filename = "./data_application/figures/output/.png",
+  filename = "./data_application/figures/output/01_resid_plot_fdim3_bai.png",
   type = "cairo",
   units = "in",
   width = 10,
