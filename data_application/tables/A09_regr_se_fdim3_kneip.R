@@ -6,7 +6,7 @@ vars_weighted_bal <- readRDS('./data_application/original_data/vars_weighted_bal
 
 # Interactive Bootstrap, Kneip estimator, fdim = 3, FE = none
 # Array to store bootstrap results.
-B <- 5
+B <- 1000
 b_hat <- array(data = NA, dim = c(7, 4, B))
 
 progress <- txtProgressBar(min = 1, max = B, style = 3)

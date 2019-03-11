@@ -3,9 +3,16 @@ library(plm)
 # Weighted data from Voigtlaender.
 data_weighted <- readRDS('./data_application/original_data/data_weighted.rds')
 
+# Time dummies.
+time_dummies <- "dummy_t1"
+
+for (i in 2:48) {
+  temp_dummy <- paste("dummy_t", i, sep = "")
+  time_dummies <- paste(time_dummies, temp_dummy, sep = "+")
+}
+
 # Fixed effects Bootstrap
-#B <- 1000 used in paper!!
-B <- 10
+B <- 1000
 b_hat_plm <- array(data = NA, dim = c(7, 6, B))
 
 progress <- txtProgressBar(min = 1, max = B, style = 3)
@@ -104,4 +111,4 @@ for (j in 1:B) {
 se_b_hat_plm <- sqrt(1 / (B - 1) * se_b_hat_plm)
 
 # Save results.
-saveRDS(se_b_hat_plm, "./data_application/tables/output/stand_errs_original_model.rds")
+saveRDS(se_b_hat_plm, "./data_application/tables/output/05_standard_errors.rds")

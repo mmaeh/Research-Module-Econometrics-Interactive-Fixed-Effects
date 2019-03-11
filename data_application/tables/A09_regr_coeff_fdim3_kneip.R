@@ -2,7 +2,7 @@ library(phtt)
 
 # Weighted data from Voigtlaender.
 vars_weighted <- readRDS('./data_application/original_data/vars_weighted.rds')
-vars_weighted_bal.rds <- readRDS('./data_application/original_data/vars_weighted_bal.rds')
+vars_weighted_bal <- readRDS('./data_application/original_data/vars_weighted_bal.rds')
 
 # dataframe to store results
 results <- as.data.frame(matrix(NA, 7, 4))
